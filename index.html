@@ -116,7 +116,7 @@
                 </div>
 
                 <div class="space-y-3 text-right" id="loginFormContainer">
-                    <label id="codeLabel" class="block text-xs font-extrabold text-slate-600 pr-1">كود الطالب :</label>
+                    <label id="codeLabel" class="block text-xs font-extrabold text-slate-600 pr-1">كود الطالب السري:</label>
                     <input id="codeInput" type="text" placeholder="مثال: 7K9M2X" dir="ltr" class="w-full text-center uppercase tracking-widest font-black text-xl py-3.5 px-4 rounded-2xl bg-slate-50 border-3 border-sky-300 focus:border-sky-500 focus:outline-none text-slate-800" />
                     
                     <button id="loginBtn" onclick="loginWithCode()" class="btn-3d w-full bg-gradient-to-l from-emerald-500 to-teal-600 border-emerald-700 text-white font-black py-4 rounded-2xl text-lg shadow-lg hover:brightness-105">
@@ -192,14 +192,14 @@
                 </button>
             </div>
 
-            <!-- Smart Daily Challenge & Leaderboard Quick Cards -->
+            <!-- Smart 6-Hours Challenge & Leaderboard Quick Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="card-glass rounded-3xl p-4 sm:p-5 flex items-center justify-between border-2 border-amber-200">
                     <div class="flex items-center gap-3">
                         <span class="text-3xl animate-bounce">🌟</span>
                         <div>
-                            <h4 id="dailyCardTitle" class="font-black text-amber-900 text-base">تحدي الذكاء اليومي</h4>
-                            <p id="dailyCardSub" class="text-xs font-bold text-slate-600 mt-0.5">سؤالان ذكاء بدون كتابة (+١٠ نجوم)</p>
+                            <h4 id="dailyCardTitle" class="font-black text-amber-900 text-base">تحدي الذكاء (كل ٦ ساعات)</h4>
+                            <p id="dailyCardSub" class="text-xs font-bold text-slate-600 mt-0.5">سؤالان ذكاء لاكتساب (+١٠ نجوم)</p>
                         </div>
                     </div>
                     <button onclick="openDailyChallenge()" class="btn-3d bg-amber-500 border-amber-700 text-white font-black px-4 py-2.5 rounded-2xl text-xs sm:text-sm whitespace-nowrap">
@@ -212,7 +212,7 @@
                         <span class="text-3xl animate-bounce">🏆</span>
                         <div>
                             <h4 id="leaderCardTitle" class="font-black text-indigo-900 text-base">لوحة شرف الأبطال</h4>
-                            <p id="leaderCardSub" class="text-xs font-bold text-slate-600 mt-0.5">تعرف على ترتيب الأول على المدرسة</p>
+                            <p id="leaderCardSub" class="text-xs font-bold text-slate-600 mt-0.5">اضغط لرؤية نجوم ومستويات أصدقائك</p>
                         </div>
                     </div>
                     <button onclick="openLeaderboard()" class="btn-3d bg-indigo-600 border-indigo-800 text-white font-black px-4 py-2.5 rounded-2xl text-xs sm:text-sm whitespace-nowrap">
@@ -423,7 +423,7 @@
         const ADMIN_SECRET = '2529';
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const LOCAL_SESSION_KEY = 'om_sameh_auth_v5';
+        const LOCAL_SESSION_KEY = 'om_sameh_auth_v6';
 
         let currentLang = 'ar';
         let holdTimer = null;
@@ -437,7 +437,8 @@
             stars: 0,
             unlocked_level: 1,
             mastered_tables: [],
-            last_daily_date: '',
+            completed_tables: [], // Stores tables that already awarded stars
+            last_daily_time: 0,   // Timestamp for 6-hours limit
             soundEnabled: true
         };
 
@@ -476,10 +477,10 @@
                 heroBadge: 'تحدي الأبطال ⚡',
                 heroTitle: 'الجدول كله عشوائي',
                 heroSub: 'أسئلة شاملة من ١ إلى ١٢ لكسب مضاعف النقاط',
-                dailyCardTitle: 'تحدي الذكاء اليومي',
-                dailyCardSub: 'سؤالان ذكاء بدون كتابة (+١٠ نجوم)',
+                dailyCardTitle: 'تحدي الذكاء (كل ٦ ساعات)',
+                dailyCardSub: 'سؤالان ذكاء لاكتساب (+١٠ نجوم)',
                 leaderCardTitle: 'لوحة شرف الأبطال',
-                leaderCardSub: 'تعرف على ترتيب الأول على المدرسة',
+                leaderCardSub: 'اضغط لرؤية نجوم ومستويات أصدقائك',
                 mapTitle: 'خريطة المستويات (١ - ١٢)',
                 mapSub: 'اضغط على المستوى للبدء',
                 logout: 'تسجيل الخروج من هذا الجهاز 🚪',
@@ -511,10 +512,10 @@
                 heroBadge: 'Heroes Marathon ⚡',
                 heroTitle: 'All Tables Random',
                 heroSub: 'Comprehensive questions from 1 to 12 for bonus stars',
-                dailyCardTitle: 'Daily Smart Challenge',
-                dailyCardSub: '2 smart math puzzles without typing (+10 stars)',
+                dailyCardTitle: '6-Hours Smart Challenge',
+                dailyCardSub: '2 smart math puzzles (+10 stars)',
                 leaderCardTitle: 'Heroes Leaderboard',
-                leaderCardSub: 'Check top ranked school heroes',
+                leaderCardSub: 'Click to view friends stars & levels',
                 mapTitle: 'Levels Map (1 - 12)',
                 mapSub: 'Click any level to start',
                 logout: 'Log out from this device 🚪',
@@ -620,7 +621,8 @@
                     stars: data.stars || 0,
                     unlocked_level: data.unlocked_level || 1,
                     mastered_tables: data.mastered_tables || [],
-                    last_daily_date: data.last_daily_date || '',
+                    completed_tables: data.completed_tables || [],
+                    last_daily_time: data.last_daily_time || 0,
                     soundEnabled: true
                 };
 
@@ -691,32 +693,35 @@
                     stars: currentStudent.stars,
                     unlocked_level: currentStudent.unlocked_level,
                     mastered_tables: currentStudent.mastered_tables,
-                    last_daily_date: currentStudent.last_daily_date
+                    completed_tables: currentStudent.completed_tables,
+                    last_daily_time: currentStudent.last_daily_time
                 }).eq('code', currentStudent.code);
             } catch (e) {}
         }
 
         // ==========================================
-        // 3. LEADERBOARD & DAILY SMART CHALLENGE (NO TYPING)
+        // 3. LEADERBOARD & 6-HOURS SMART CHALLENGE
         // ==========================================
         async function openLeaderboard() {
             Swal.fire({ title: currentLang==='ar'?'جاري تحميل لوحة الشرف...':'Loading Leaderboard...', didOpen: () => Swal.showLoading() });
-            const { data } = await supabaseClient.from('student_codes').select('student_name, stars, unlocked_level, gender').order('stars', { ascending: false }).limit(10);
+            const { data } = await supabaseClient.from('student_codes').select('student_name, stars, unlocked_level, gender, mastered_tables').order('stars', { ascending: false });
             
             if (!data) { Swal.fire('تعذّر جلب لوحة الشرف'); return; }
 
-            let html = '<div class="space-y-2 text-right max-h-[50vh] overflow-y-auto p-1">';
+            let html = '<div class="space-y-2 text-right max-h-[55vh] overflow-y-auto p-1">';
             data.forEach((st, idx) => {
                 let medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx+1}`;
                 let bg = idx === 0 ? 'bg-amber-100 border-amber-300' : idx === 1 ? 'bg-slate-100 border-slate-300' : idx === 2 ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-100';
                 let icon = st.gender === 'batla' ? '🌸' : '⚡';
+                let masteredCount = st.mastered_tables ? st.mastered_tables.length : 0;
+                
                 html += `
                     <div class="flex items-center justify-between p-3 rounded-2xl border-2 ${bg}">
                         <div class="flex items-center gap-3">
                             <span class="text-2xl font-black">${medal}</span>
                             <div>
                                 <div class="font-black text-slate-800">${icon} ${st.student_name}</div>
-                                <div class="text-xs text-slate-500 font-bold">${currentLang==='ar'?'المستوى':'Level'} ${toAr(st.unlocked_level)}</div>
+                                <div class="text-xs text-slate-500 font-bold">${currentLang==='ar'?'المستوى':'Level'} ${toAr(st.unlocked_level)} | ${currentLang==='ar'?'جداول متقنة':'Mastered'}: ${toAr(masteredCount)}/١٢</div>
                             </div>
                         </div>
                         <div class="font-black text-amber-700 text-lg">${toAr(st.stars)} ⭐</div>
@@ -732,36 +737,35 @@
         }
 
         async function openDailyChallenge() {
-            const todayStr = new Date().toISOString().slice(0, 10);
-            if (currentStudent.last_daily_date === todayStr) {
+            const now = Date.now();
+            const sixHours = 6 * 60 * 60 * 1000;
+            if (currentStudent.last_daily_time && (now - currentStudent.last_daily_time < sixHours)) {
+                const remainingHours = Math.ceil((sixHours - (now - currentStudent.last_daily_time)) / (1000 * 60 * 60));
                 Swal.fire({
                     icon: 'info',
-                    title: currentLang==='ar'?'أنجزت تحدي اليوم بالفعل! 🎉':'Already Completed Today!',
-                    text: currentLang==='ar'?'لقد شاركت في تحدي اليوم. انتظر تحدي جديد غداً!':'You already solved today\'s puzzle. Come back tomorrow!'
+                    title: currentLang==='ar'?'التحدي قيد الانتظار! ⏳':'Challenge on cooldown!',
+                    text: currentLang==='ar' ? `لقد انجزت تحدي الذكاء مؤخراً. يمكنك إعادة المحاولة خلال ${toAr(remainingHours)} ساعات تقريباً.` : `You can retry the smart challenge in about ${remainingHours} hours.`
                 });
                 return;
             }
 
-            // Question 1: (6 x 7) + 8 = 50
-            // Question 2: (9 x 4) - 6 = 30
             const qList = [
                 { q: '٦ × ٧ + ٨ = ؟', ans: 50, choices: [42, 50, 56, 48] },
                 { q: '٩ × ٤ - ٦ = ؟', ans: 30, choices: [30, 36, 28, 32] }
             ];
 
             let qIdx = 0;
-            let correctCount = 0;
 
             const askQuestion = async () => {
                 if (qIdx >= qList.length) {
                     currentStudent.stars += 10;
-                    currentStudent.last_daily_date = todayStr;
+                    currentStudent.last_daily_time = Date.now();
                     await syncCloud();
                     confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
                     Swal.fire({
                         icon: 'success',
                         title: currentLang==='ar'?'إجابات عبقرية! +١٠ نجوم ⭐':'Genius Answers! +10 Stars ⭐',
-                        text: currentLang==='ar'?'تم إضافة النجوم لرصيدك بنجاح ولا يمكنك إعادة التحدي إلا غداً.':'Stars added successfully!'
+                        text: currentLang==='ar'?'تم إضافة ١٠ نجوم لرصيدك بنجاح!':'Stars added successfully!'
                     });
                     return;
                 }
@@ -770,7 +774,7 @@
                 const shuffledOpts = shuffle(currentQ.choices);
 
                 const { value: selected } = await Swal.fire({
-                    title: currentLang==='ar' ? `🌟 تحدي الذكاء اليومي (سؤال ${toAr(qIdx+1)} من ٢)` : `Daily Challenge (${qIdx+1}/2)`,
+                    title: currentLang==='ar' ? `🌟 تحدي الذكاء (سؤال ${toAr(qIdx+1)} من ٢)` : `Smart Challenge (${qIdx+1}/2)`,
                     html: `<div class="text-3xl font-black text-indigo-700 my-4" dir="ltr">${currentQ.q}</div>`,
                     input: 'radio',
                     inputOptions: {
@@ -788,17 +792,16 @@
 
                 if (selected !== undefined) {
                     if (parseInt(selected, 10) === currentQ.ans) {
-                        correctCount++;
                         qIdx++;
                         askQuestion();
                     } else {
                         sfxWrong();
-                        currentStudent.last_daily_date = todayStr; // Block for today even if failed
+                        currentStudent.last_daily_time = Date.now();
                         await syncCloud();
                         Swal.fire({
                             icon: 'error',
                             title: currentLang==='ar'?'إجابة خاطئة!':'Incorrect!',
-                            text: currentLang==='ar'?'للأسف انتهى تحدي اليوم. حاول غداً بنشاط أكبر!':'Challenge ended. Try tomorrow!'
+                            text: currentLang==='ar'?'للأسف انتهى التحدي. يمكنك المحاولة مرة أخرى بعد ٦ ساعات.':'Challenge ended. Try again in 6 hours.'
                         });
                     }
                 }
@@ -847,7 +850,7 @@
         }
 
         function generateSecureCode() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No similar chars like O/0, I/1
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let code = '';
             for (let i = 0; i < 6; i++) {
                 code += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -929,7 +932,7 @@
         function toggleSound() { currentStudent.soundEnabled = !currentStudent.soundEnabled; updateDashboardUI(); }
 
         // ==========================================
-        // 6. DASHBOARD & GAMEPLAY
+        // 6. DASHBOARD & GAMEPLAY (WITH NO REPEAT CHEATING)
         // ==========================================
         function updateDashboardUI() {
             document.getElementById('headerStars').textContent = toAr(currentStudent.stars);
@@ -970,6 +973,7 @@
         let selectedTable = 1;
         let customTables = [2, 7, 8];
         let customOrder = 'random';
+        let currentGameMode = 'single'; // 'single', 'custom', 'all'
 
         function openLevelModal(t) {
             selectedTable = t;
@@ -1025,6 +1029,7 @@
 
         function startSingleTable(order) {
             closeLevelModal();
+            currentGameMode = 'single';
             let qs = [];
             for (let i = 1; i <= 12; i++) qs.push({ a: selectedTable, b: i, ans: selectedTable * i });
             if (order === 'random') qs = shuffle(qs);
@@ -1034,6 +1039,7 @@
         function startCustomQuiz() {
             if (customTables.length === 0) { Swal.fire('اختر جدولاً واحداً على الأقل!'); return; }
             closeCustomModal();
+            currentGameMode = 'custom';
             let pool = [];
             customTables.forEach(t => { for(let i=1; i<=12; i++) pool.push({a:t, b:i, ans:t*i}); });
             if (customOrder === 'random') pool = shuffle(pool).slice(0, 15);
@@ -1041,6 +1047,7 @@
         }
 
         function startAllRandom() {
+            currentGameMode = 'all';
             let pool = [];
             for(let t=1; t<=12; t++) for(let i=1; i<=12; i++) pool.push({a:t, b:i, ans:t*i});
             launchGame(shuffle(pool).slice(0, 20), currentLang==='ar'?'التحدي الشامل (١-١٢)':'Marathon (1-12)');
@@ -1105,7 +1112,6 @@
                 sfxCorrect();
                 gameConfig.correct++;
                 gameConfig.streak++;
-                currentStudent.stars += 1; // Balanced normal score
                 ansBox.className = 'min-w-[90px] px-3 py-1 rounded-2xl bg-emerald-100 border-4 border-emerald-500 text-emerald-700 animate-pop';
                 btn.className = 'btn-3d bg-emerald-500 border-emerald-700 text-white font-black text-3xl py-4 rounded-2xl shadow';
                 setTimeout(nextQ, 900);
@@ -1129,25 +1135,43 @@
 
         async function finishGame() {
             const accuracy = gameConfig.correct / gameConfig.questions.length;
+            let earnedStars = 0;
             let unlockedNew = false;
+
             if (accuracy >= 0.8) {
                 confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-                if (gameConfig.questions.length === 12) {
+
+                if (currentGameMode === 'single') {
                     const t = selectedTable;
+                    // Check if student already completed this table before to prevent farming stars
+                    if (!currentStudent.completed_tables) currentStudent.completed_tables = [];
+                    
+                    if (!currentStudent.completed_tables.includes(t)) {
+                        currentStudent.completed_tables.push(t);
+                        earnedStars = 10; // Reward for first time completion
+                        currentStudent.stars += earnedStars;
+                    }
+
                     if (!currentStudent.mastered_tables.includes(t)) currentStudent.mastered_tables.push(t);
                     if (t === currentStudent.unlocked_level && currentStudent.unlocked_level < 12) {
                         currentStudent.unlocked_level++;
                         unlockedNew = true;
                     }
+                } else {
+                    // For custom or marathon, reward normal balanced stars once per run if high score
+                    earnedStars = 5;
+                    currentStudent.stars += earnedStars;
                 }
             }
 
             await syncCloud();
 
+            let starsMsg = earnedStars > 0 ? `<b class="text-amber-600">+${toAr(earnedStars)} ⭐ (${currentLang==='ar'?'أول إنجاز لهذا الجدول!':'First time reward!'})</b>` : `<span class="text-slate-400">${currentLang==='ar'?'لقد حصلت على نجوم هذا المستوى مسبقاً، ركز في مستويات أخرى!':'Stars already claimed for this level earlier!'}</span>`;
+
             Swal.fire({
                 icon: accuracy >= 0.8 ? 'success' : 'info',
                 title: accuracy >= 0.8 ? (currentLang==='ar'?'أداء أسطوري يا بطل! 🏆':'Legendary Performance! 🏆') : (currentLang==='ar'?'محاولة جيدة جداً! 💪':'Good Effort! 💪'),
-                html: `<b>${currentLang==='ar'?'النتيجة':'Score'}:</b> ${toAr(gameConfig.correct)} / ${toAr(gameConfig.questions.length)}<br><b>${currentLang==='ar'?'النجوم المكتسبة':'Stars Earned'}:</b> +${toAr(gameConfig.correct)} ⭐${unlockedNew?'<br><b class="text-emerald-600">🔓 تم فتح المستوى التالي!</b>':''}`,
+                html: `<b>${currentLang==='ar'?'النتيجة':'Score'}:</b> ${toAr(gameConfig.correct)} / ${toAr(gameConfig.questions.length)}<br>${starsMsg}${unlockedNew?'<br><b class="text-emerald-600">🔓 تم فتح المستوى التالي!</b>':''}`,
                 confirmButtonText: currentLang==='ar'?'الرئيسية 🏠':'Home 🏠'
             }).then(() => exitGame());
         }
