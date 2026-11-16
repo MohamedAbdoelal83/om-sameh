@@ -9,11 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             font-family: 'Cairo', sans-serif;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
+        }
+        input {
+            user-select: text !important;
         }
         body {
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #fef3c7 100%);
@@ -29,7 +33,7 @@
             border-bottom-width: 2px;
         }
         .card-glass {
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.94);
             backdrop-filter: blur(10px);
             border: 3px solid #ffffff;
             box-shadow: 0 12px 28px -5px rgba(14, 116, 144, 0.15);
@@ -65,17 +69,17 @@
     <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b-4 border-sky-200 shadow-sm px-4 py-3">
         <div class="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white text-2xl font-black shadow-md animate-float">
+                <div onclick="handleLogoTap()" class="cursor-pointer w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white text-2xl font-black shadow-md animate-float" title="مدرسة أم سامح">
                     🏫
                 </div>
                 <div>
                     <h1 class="text-lg sm:text-xl font-black text-sky-900 leading-tight">مدرسة أم سامح</h1>
-                    <p class="text-xs sm:text-sm font-bold text-amber-600">مغامرة أبطال جدول الضرب</p>
+                    <p id="headerStudentName" class="text-xs sm:text-sm font-bold text-amber-600">مغامرة أبطال جدول الضرب</p>
                 </div>
             </div>
 
             <!-- Stats Bar -->
-            <div class="flex items-center gap-2 sm:gap-3">
+            <div id="headerStats" class="hidden flex items-center gap-2 sm:gap-3">
                 <div class="bg-amber-100 border-2 border-amber-300 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 shadow-inner">
                     <span class="text-lg">⭐</span>
                     <span id="headerStars" class="font-black text-amber-800 text-base sm:text-lg">٠</span>
@@ -84,7 +88,7 @@
                     <span class="text-lg">🏆</span>
                     <span id="headerRank" class="font-extrabold text-purple-800 text-xs sm:text-sm">مبتدئ ذكي</span>
                 </div>
-                <button onclick="toggleSound()" id="soundBtn" class="w-10 h-10 rounded-2xl bg-sky-100 border-2 border-sky-300 flex items-center justify-center text-lg hover:bg-sky-200 transition" title="تشغيل/إيقاف الصوت">
+                <button onclick="toggleSound()" id="soundBtn" class="w-10 h-10 rounded-2xl bg-sky-100 border-2 border-sky-300 flex items-center justify-center text-lg hover:bg-sky-200 transition">
                     🔊
                 </button>
             </div>
@@ -94,17 +98,68 @@
     <!-- Main Container -->
     <main class="max-w-3xl mx-auto px-4 pt-6">
 
+        <!-- VIEW 0: LOGIN & SUBSCRIPTION GATE -->
+        <section id="loginView" class="max-w-md mx-auto space-y-5 animate-pop">
+            <div class="card-glass rounded-3xl p-6 sm:p-8 text-center space-y-5">
+                <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white text-4xl flex items-center justify-center shadow-lg">
+                    🔐
+                </div>
+                
+                <div class="space-y-1">
+                    <h2 class="text-2xl font-black text-slate-800">بوابة أبطال الرياضيات</h2>
+                    <p class="text-sm font-bold text-slate-500">أدخل كود الاشتراك الخاص بك لبدء المغامرة</p>
+                </div>
+
+                <!-- Alert Box (Kicked out / Error) -->
+                <div id="loginAlert" class="hidden bg-rose-100 border-2 border-rose-300 text-rose-800 text-sm font-extrabold p-3 rounded-2xl">
+                </div>
+
+                <!-- Code Input Form -->
+                <div class="space-y-3 text-right">
+                    <label class="block text-xs font-extrabold text-slate-600 pr-1">كود الطالب السري:</label>
+                    <input id="codeInput" type="text" placeholder="مثال: SA-4821" dir="ltr" class="w-full text-center uppercase tracking-widest font-black text-2xl py-3.5 px-4 rounded-2xl bg-slate-50 border-3 border-sky-300 focus:border-sky-500 focus:outline-none text-slate-800" />
+                    
+                    <button id="loginBtn" onclick="loginWithCode()" class="btn-3d w-full bg-gradient-to-l from-emerald-500 to-teal-600 border-emerald-700 text-white font-black py-4 rounded-2xl text-xl shadow-lg hover:brightness-105">
+                        دخول للمنصة 🚀
+                    </button>
+                </div>
+
+                <!-- Subscription / WhatsApp CTA Box -->
+                <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 space-y-3 text-center">
+                    <div class="inline-block bg-amber-200/80 text-amber-900 text-xs font-black px-3 py-1 rounded-full">
+                        ليس لديك كود اشتراك؟ ✨
+                    </div>
+                    <p class="text-sm font-extrabold text-slate-700 leading-relaxed">
+                        احصل على كودك الخاص لفتح جميع جداول الضرب وحفظ مستواك مقابل <span class="text-emerald-600 font-black underline">٥٠ ريال سعودي</span> فقط!
+                    </p>
+                    <a id="whatsappBtn" href="#" target="_blank" class="btn-3d w-full bg-[#25D366] border-[#128C7E] text-white font-black py-3 px-4 rounded-2xl text-base flex items-center justify-center gap-2 shadow-md hover:brightness-105">
+                        <span>💬</span>
+                        <span>تواصل واتساب للحصول على الكود</span>
+                    </a>
+                    <div class="text-xs font-bold text-slate-500" dir="ltr">
+                        01018984311
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button onclick="openAdminAuth()" class="text-xs font-bold text-slate-400 hover:text-sky-600 transition">
+                    ⚙️ لوحة إدارة المدرسة
+                </button>
+            </div>
+        </section>
+
         <!-- VIEW 1: HOME / DASHBOARD -->
-        <section id="homeView" class="space-y-6 animate-pop">
+        <section id="homeView" class="hidden space-y-6 animate-pop">
             
             <!-- Welcome & Progress Banner -->
             <div class="card-glass rounded-3xl p-5 sm:p-6 relative overflow-hidden">
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="text-center sm:text-right space-y-1">
                         <span class="inline-block bg-emerald-100 text-emerald-700 font-extrabold text-xs px-3 py-1 rounded-full">
-                            💾 تقدمك محفوظ تلقائياً على جهازك
+                            ☁️ حسابك محمي ومحفوظ سحابياً (<span id="badgeCode" dir="ltr"></span>)
                         </span>
-                        <h2 class="text-2xl sm:text-3xl font-black text-slate-800">أهلاً بك يا بطل الرياضيات! 🚀</h2>
+                        <h2 class="text-2xl sm:text-3xl font-black text-slate-800">أهلاً يا <span id="welcomeStudentName" class="text-sky-600">بطل</span>! 🚀</h2>
                         <p class="text-slate-600 font-semibold text-sm sm:text-base">
                             أكمل الجداول بالترتيب لتفتح المستويات التالية، أو اصنع تحديك الخاص!
                         </p>
@@ -129,7 +184,6 @@
 
             <!-- Action Mode Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <!-- Custom Multi-Table Challenge -->
                 <button onclick="openCustomModal()" class="btn-3d bg-gradient-to-l from-orange-500 to-amber-500 border-orange-700 text-white rounded-3xl p-5 text-right flex items-center justify-between shadow-lg hover:brightness-105">
                     <div>
                         <div class="bg-white/20 inline-block px-2.5 py-0.5 rounded-lg text-xs font-bold mb-1">تحدي مخصص 🎯</div>
@@ -139,7 +193,6 @@
                     <span class="text-4xl">🎲</span>
                 </button>
 
-                <!-- All Tables Random Marathon -->
                 <button onclick="startAllRandom()" class="btn-3d bg-gradient-to-l from-purple-600 to-indigo-600 border-indigo-800 text-white rounded-3xl p-5 text-right flex items-center justify-between shadow-lg hover:brightness-105">
                     <div>
                         <div class="bg-white/20 inline-block px-2.5 py-0.5 rounded-lg text-xs font-bold mb-1">تحدي الأبطال ⚡</div>
@@ -160,14 +213,13 @@
                 </div>
 
                 <div id="levelsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
-                    <!-- Generated via JS -->
                 </div>
             </div>
 
-            <!-- Reset Option -->
+            <!-- Logout Button -->
             <div class="text-center pt-2">
-                <button onclick="resetProgress()" class="text-xs font-bold text-slate-400 hover:text-rose-500 underline transition">
-                    إعادة ضبط التقدم المحفوظ على هذا الهاتف
+                <button onclick="logoutStudent(false)" class="text-xs font-bold text-slate-400 hover:text-rose-500 underline transition">
+                    تسجيل الخروج من هذا الجهاز 🚪
                 </button>
             </div>
         </section>
@@ -186,7 +238,6 @@
                 </div>
 
                 <div class="space-y-3">
-                    <!-- Option 1: Study / Quick View -->
                     <button onclick="openStudySheet()" class="btn-3d w-full bg-amber-100 border-amber-300 text-amber-900 rounded-2xl p-4 flex items-center justify-between hover:bg-amber-200">
                         <div class="text-right">
                             <div class="font-black text-base">📖 راجع الجدول أولاً</div>
@@ -195,7 +246,6 @@
                         <span class="text-2xl">👀</span>
                     </button>
 
-                    <!-- Option 2: Ordered -->
                     <button onclick="startSingleTable('ordered')" class="btn-3d w-full bg-sky-500 border-sky-700 text-white rounded-2xl p-4 flex items-center justify-between hover:brightness-105">
                         <div class="text-right">
                             <div class="font-black text-base">🔢 بالترتيب (من ١ إلى ١٢)</div>
@@ -204,7 +254,6 @@
                         <span class="text-2xl">📶</span>
                     </button>
 
-                    <!-- Option 3: Random -->
                     <button onclick="startSingleTable('random')" class="btn-3d w-full bg-emerald-500 border-emerald-700 text-white rounded-2xl p-4 flex items-center justify-between hover:brightness-105">
                         <div class="text-right">
                             <div class="font-black text-base">🔀 عشوائي (اختبار الذكاء)</div>
@@ -224,7 +273,6 @@
                     <button onclick="closeStudySheet()" class="w-9 h-9 rounded-full bg-slate-100 font-black text-slate-600">✕</button>
                 </div>
                 <div id="studyGrid" class="grid grid-cols-2 gap-2.5 max-h-[60vh] overflow-y-auto p-1">
-                    <!-- Populated by JS -->
                 </div>
                 <button onclick="closeStudySheet(); startSingleTable('ordered');" class="btn-3d w-full bg-emerald-500 border-emerald-700 text-white font-black py-3.5 rounded-2xl text-lg">
                     أنا جاهز للتحدي الآن! 💪
@@ -243,12 +291,9 @@
                     <p class="text-sm font-bold text-slate-500">اختر الجداول التي تريد التدرب عليها معاً:</p>
                 </div>
 
-                <!-- Checkboxes 1-12 -->
                 <div id="customCheckboxes" class="grid grid-cols-4 gap-2.5">
-                    <!-- Populated by JS -->
                 </div>
 
-                <!-- Order Toggle -->
                 <div class="bg-slate-100 p-2 rounded-2xl flex gap-2">
                     <button id="customRandomBtn" onclick="setCustomOrder('random')" class="flex-1 py-2 rounded-xl font-black text-sm bg-orange-500 text-white shadow">
                         🔀 أسئلة عشوائية
@@ -266,7 +311,6 @@
 
         <!-- VIEW 5: INTERACTIVE GAME ARENA -->
         <section id="gameView" class="hidden space-y-5 animate-pop">
-            <!-- Top Bar -->
             <div class="flex items-center justify-between bg-white/90 px-4 py-3 rounded-2xl shadow-sm border-2 border-sky-100">
                 <button onclick="exitGame()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold px-3.5 py-2 rounded-xl text-sm flex items-center gap-1">
                     <span>🏠</span> خروج
@@ -277,26 +321,21 @@
                     <div class="text-sm font-black text-slate-700">سؤال <span id="qCurrent">١</span> من <span id="qTotal">١٢</span></div>
                 </div>
 
-                <!-- Combo Streak Badge -->
                 <div id="streakBadge" class="bg-orange-100 border-2 border-orange-300 px-3 py-1.5 rounded-xl flex items-center gap-1 transition-transform">
                     <span>🔥</span>
                     <span id="streakCount" class="font-black text-orange-700 text-sm">٠</span>
                 </div>
             </div>
 
-            <!-- Question Progress Bar -->
             <div class="w-full h-3 bg-white rounded-full overflow-hidden shadow-inner border border-sky-200">
                 <div id="gameProgressBar" class="h-full bg-gradient-to-l from-amber-400 to-orange-500 transition-all duration-300" style="width: 8%"></div>
             </div>
 
-            <!-- Question Card -->
             <div id="questionCard" class="card-glass rounded-3xl p-6 sm:p-8 text-center space-y-5 relative overflow-hidden">
-                <!-- Motivational Bubble -->
                 <div id="coachMessage" class="inline-block bg-sky-100 text-sky-800 font-extrabold text-sm px-4 py-1.5 rounded-full">
                     ركز يا بطل.. كم يساوي حاصل الضرب؟ 🤔
                 </div>
 
-                <!-- Math Equation -->
                 <div dir="rtl" class="py-3 flex items-center justify-center gap-3 sm:gap-5 text-5xl sm:text-7xl font-black text-slate-800">
                     <span id="numA" class="text-sky-600">٧</span>
                     <span class="text-amber-500 text-4xl sm:text-6xl">×</span>
@@ -307,29 +346,23 @@
                     </span>
                 </div>
 
-                <!-- Smart Visual Helper (Interactive Hint) -->
                 <div>
                     <button onclick="toggleVisualHelper()" class="text-xs sm:text-sm font-extrabold text-purple-600 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-4 py-1.5 rounded-full transition inline-flex items-center gap-1.5">
                         <span>💡</span> مش متأكد؟ شوف طريقة الحل الذكية
                     </button>
                     <div id="visualHelperBox" class="hidden mt-3 bg-purple-50/90 border-2 border-purple-200 rounded-2xl p-3.5 text-sm font-bold text-purple-900 animate-pop">
-                        <!-- Dynamic helper content -->
                     </div>
                 </div>
 
-                <!-- Interactive Multiple Choice OR Keypad -->
                 <div id="choicesGrid" class="grid grid-cols-2 gap-3 pt-2">
-                    <!-- 4 Interactive Choice Buttons generated via JS -->
                 </div>
 
-                <!-- Toggle Keypad Mode -->
                 <div class="pt-1">
                     <button onclick="toggleInputMode()" id="toggleInputBtn" class="text-xs font-bold text-slate-500 hover:text-sky-600 underline">
                         التبديل إلى لوحة الأرقام (اكتب الإجابة بنفسك) ⌨️
                     </button>
                 </div>
 
-                <!-- Custom Keypad (Arabic Digits) -->
                 <div id="keypadContainer" class="hidden max-w-xs mx-auto pt-2 space-y-2.5">
                     <div class="grid grid-cols-3 gap-2" dir="rtl">
                         <button onclick="pressKey(1)" class="btn-3d bg-white border-slate-300 text-slate-800 font-black text-2xl py-3 rounded-2xl">١</button>
@@ -358,7 +391,6 @@
                 <p id="resultSubtitle" class="text-slate-600 font-bold text-sm sm:text-base">لقد أتممت التحدي بنجاح باهر</p>
             </div>
 
-            <!-- Score Summary Boxes -->
             <div class="grid grid-cols-3 gap-3 max-w-md mx-auto">
                 <div class="bg-emerald-50 border-2 border-emerald-200 p-3 rounded-2xl">
                     <div class="text-xs font-bold text-emerald-700">إجابات صحيحة</div>
@@ -374,12 +406,10 @@
                 </div>
             </div>
 
-            <!-- Level Unlock Notice -->
             <div id="unlockBanner" class="hidden bg-gradient-to-l from-emerald-500 to-teal-600 text-white p-4 rounded-2xl font-black text-base shadow-md">
                 🔓 رائع! تم فتح المستوى التالي بنجاح!
             </div>
 
-            <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                 <button id="nextLevelBtn" onclick="playNextLevel()" class="hidden btn-3d bg-emerald-500 border-emerald-700 text-white font-black px-6 py-4 rounded-2xl text-lg flex-1">
                     الانتقال للمستوى التالي ⬅️
@@ -393,57 +423,417 @@
             </div>
         </section>
 
+        <!-- VIEW 7: SECRET ADMIN PANEL (CODE GENERATOR) -->
+        <section id="adminView" class="hidden space-y-5 animate-pop">
+            <div class="card-glass rounded-3xl p-6 space-y-5">
+                <div class="flex items-center justify-between border-b-2 border-slate-100 pb-3">
+                    <div>
+                        <h2 class="text-xl font-black text-slate-800">👑 لوحة إدارة أكواد الطلاب</h2>
+                        <p class="text-xs font-bold text-slate-500">إنشاء ومتابعة اشتراكات مدرسة أم سامح</p>
+                    </div>
+                    <button onclick="closeAdminPanel()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-black px-4 py-2 rounded-xl text-sm">
+                        إغلاق ✕
+                    </button>
+                </div>
+
+                <!-- Create New Code Form -->
+                <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-4 space-y-3">
+                    <h3 class="font-black text-sky-900 text-sm">➕ إصدار كود اشتراك جديد (٥٠ ريال)</h3>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input id="newStudentName" type="text" placeholder="اسم الطالب (مثلاً: عمر محمد)" class="flex-1 px-4 py-3 rounded-xl border-2 border-sky-300 font-bold text-sm focus:outline-none" />
+                        <button onclick="createNewStudentCode()" class="btn-3d bg-sky-600 border-sky-800 text-white font-black px-5 py-3 rounded-xl text-sm">
+                            توليد الكود 🎫
+                        </button>
+                    </div>
+                    <div id="generatedCodeBox" class="hidden bg-white border-2 border-emerald-400 rounded-xl p-3 text-center space-y-2">
+                        <div class="text-xs font-bold text-slate-500">تم إنشاء الكود بنجاح! اضغط لنسخ رسالة الواتساب:</div>
+                        <div id="generatedCodeText" dir="ltr" class="text-2xl font-black text-emerald-600 tracking-wider"></div>
+                        <button onclick="copyInviteMessage()" class="bg-emerald-500 text-white font-black text-xs px-4 py-2 rounded-lg">
+                            📋 نسخ رسالة التفعيل لإرسالها للطالب
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Students Table -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-black text-slate-700 text-sm">📋 قائمة المشتركين (<span id="totalSubscribersCount">٠</span>)</h3>
+                        <button onclick="fetchAllCodes()" class="text-xs font-bold text-sky-600 underline">تحديث القائمة 🔄</button>
+                    </div>
+                    <div id="adminCodesList" class="space-y-2 max-h-[50vh] overflow-y-auto">
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <script>
         // ==========================================
-        // 0. ARABIC DIGITS CONVERTER HELPER
+        // 0. SUPABASE & APP CONFIGURATION
         // ==========================================
+        const SUPABASE_URL = 'https://flubqhplskwccgjftynb.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_MWwb8PZvc0uuW65mOnLgPQ_1MxobdqI';
+        const WHATSAPP_NUMBER = '201018984311';
+        const ADMIN_PASSWORD = '2026';
+
+        // Initialize Supabase Client
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Setup WhatsApp Button Link
+        const waMsg = encodeURIComponent('السلام عليكم، أريد الاشتراك والحصول على كود تفعيل منصة مدرسة أم سامح لجدول الضرب (٥٠ ريال سعودي).');
+        document.getElementById('whatsappBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
+
+        // Arabic Digits Converter
         const ARABIC_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
         function toAr(val) {
             return String(val).replace(/\d/g, d => ARABIC_DIGITS[Number(d)]);
         }
 
         // ==========================================
-        // 1. STATE & LOCALSTORAGE PERSISTENCE
+        // 1. CLOUD AUTH & SINGLE-SESSION PROTECTION
         // ==========================================
-        const STORAGE_KEY = 'om_sameh_math_hero_v1';
+        const LOCAL_SESSION_KEY = 'om_sameh_auth_v2';
+        let sessionCheckInterval = null;
 
-        let userData = {
+        let currentStudent = {
+            code: '',
+            student_name: '',
+            session_id: '',
             stars: 0,
-            unlockedLevel: 1,
-            masteredTables: [],
+            unlocked_level: 1,
+            mastered_tables: [],
             soundEnabled: true
         };
 
-        function loadUserData() {
+        function generateSessionId() {
+            return 'sess_' + Math.random().toString(36).substring(2, 12) + '_' + Date.now();
+        }
+
+        async function initAuth() {
+            const saved = localStorage.getItem(LOCAL_SESSION_KEY);
+            if (!saved) {
+                showLoginScreen();
+                return;
+            }
+
             try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    userData = { ...userData, ...JSON.parse(saved) };
+                const parsed = JSON.parse(saved);
+                if (!parsed.code || !parsed.session_id) {
+                    showLoginScreen();
+                    return;
                 }
+
+                currentStudent = { ...currentStudent, ...parsed };
+                enterAppDashboard();
+                await verifyActiveSession();
             } catch (e) {
-                console.warn('Storage read error:', e);
+                showLoginScreen();
             }
         }
 
-        function saveUserData() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
-            } catch (e) {
-                console.warn('Storage save error:', e);
+        async function loginWithCode() {
+            const inputEl = document.getElementById('codeInput');
+            const code = inputEl.value.trim().toUpperCase();
+            const alertBox = document.getElementById('loginAlert');
+            const loginBtn = document.getElementById('loginBtn');
+
+            alertBox.classList.add('hidden');
+
+            if (!code) {
+                showLoginError('من فضلك اكتب كود الاشتراك أولاً! ✍️');
+                return;
             }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'جاري التحقق من الكود... ⏳';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('student_codes')
+                    .select('*')
+                    .eq('code', code)
+                    .single();
+
+                if (error || !data) {
+                    showLoginError('❌ الكود غير صحيح! تأكد من كتابته بشكل سليم أو تواصل معنا عبر واتساب.');
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'دخول للمنصة 🚀';
+                    return;
+                }
+
+                if (!data.is_active) {
+                    showLoginError('⛔ تم إيقاف هذا الكود. يرجى التواصل مع الإدارة لتجديد الاشتراك.');
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'دخول للمنصة 🚀';
+                    return;
+                }
+
+                const newSessionId = generateSessionId();
+
+                const { error: updateErr } = await supabaseClient
+                    .from('student_codes')
+                    .update({ active_session_id: newSessionId })
+                    .eq('code', code);
+
+                if (updateErr) throw updateErr;
+
+                currentStudent = {
+                    code: data.code,
+                    student_name: data.student_name,
+                    session_id: newSessionId,
+                    stars: data.stars || 0,
+                    unlocked_level: data.unlocked_level || 1,
+                    mastered_tables: data.mastered_tables || [],
+                    soundEnabled: true
+                };
+
+                localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(currentStudent));
+                enterAppDashboard();
+            } catch (err) {
+                showLoginError('حدث خطأ في الاتصال بالإنترنت. حاول مرة أخرى.');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'دخول للمنصة 🚀';
+            }
+        }
+
+        function showLoginError(msg) {
+            const alertBox = document.getElementById('loginAlert');
+            alertBox.textContent = msg;
+            alertBox.classList.remove('hidden');
+            sfxWrong();
+        }
+
+        function showLoginScreen(kickedReason = '') {
+            if (sessionCheckInterval) clearInterval(sessionCheckInterval);
+            document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('gameView').classList.add('hidden');
+            document.getElementById('resultView').classList.add('hidden');
+            document.getElementById('adminView').classList.add('hidden');
+            document.getElementById('headerStats').classList.add('hidden');
+            document.getElementById('headerStudentName').textContent = 'مغامرة أبطال جدول الضرب';
+            document.getElementById('loginView').classList.remove('hidden');
+
+            if (kickedReason) {
+                showLoginError(kickedReason);
+            }
+        }
+
+        function enterAppDashboard() {
+            document.getElementById('loginView').classList.add('hidden');
+            document.getElementById('adminView').classList.add('hidden');
+            document.getElementById('homeView').classList.remove('hidden');
+            document.getElementById('headerStats').classList.remove('hidden');
+
+            document.getElementById('headerStudentName').textContent = `البطل: ${currentStudent.student_name}`;
+            document.getElementById('welcomeStudentName').textContent = currentStudent.student_name;
+            document.getElementById('badgeCode').textContent = currentStudent.code;
+
             updateDashboardUI();
+            startSessionGuard();
+        }
+
+        function startSessionGuard() {
+            if (sessionCheckInterval) clearInterval(sessionCheckInterval);
+            sessionCheckInterval = setInterval(verifyActiveSession, 5000);
+        }
+
+        async function verifyActiveSession() {
+            if (!supabaseClient || !currentStudent.code) return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('student_codes')
+                    .select('active_session_id, is_active, stars, unlocked_level, mastered_tables')
+                    .eq('code', currentStudent.code)
+                    .single();
+
+                if (error || !data) return;
+
+                if (!data.is_active) {
+                    logoutStudent(true, '⛔ تم إيقاف اشتراك هذا الكود من قبل الإدارة.');
+                    return;
+                }
+
+                if (data.active_session_id && data.active_session_id !== currentStudent.session_id) {
+                    logoutStudent(true, '⚠️ تم فتح حسابك من جهاز آخر! لا يمكن تشغيل الكود على جهازين في نفس الوقت.');
+                    return;
+                }
+            } catch (e) {
+                // Ignore transient network drops
+            }
+        }
+
+        function logoutStudent(wasKicked = false, reason = '') {
+            localStorage.removeItem(LOCAL_SESSION_KEY);
+            currentStudent.code = '';
+            currentStudent.session_id = '';
+            showLoginScreen(wasKicked ? reason : '');
+        }
+
+        async function syncProgressToCloud() {
+            localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(currentStudent));
+            updateDashboardUI();
+
+            if (!supabaseClient || !currentStudent.code) return;
+            try {
+                const { data } = await supabaseClient
+                    .from('student_codes')
+                    .select('active_session_id')
+                    .eq('code', currentStudent.code)
+                    .single();
+
+                if (data && data.active_session_id !== currentStudent.session_id) {
+                    logoutStudent(true, '⚠️ تم فتح حسابك من جهاز آخر! تم تسجيل الخروج من هذا الجهاز.');
+                    return;
+                }
+
+                await supabaseClient
+                    .from('student_codes')
+                    .update({
+                        stars: currentStudent.stars,
+                        unlocked_level: currentStudent.unlocked_level,
+                        mastered_tables: currentStudent.mastered_tables
+                    })
+                    .eq('code', currentStudent.code);
+            } catch (e) {
+                console.warn('Cloud sync deferred:', e);
+            }
         }
 
         // ==========================================
-        // 2. WEB AUDIO API (FUN SOUND EFFECTS)
+        // 2. SECRET ADMIN PANEL (FOR SCHOOL / YOU)
+        // ==========================================
+        let logoTapCount = 0;
+        let logoTapTimer = null;
+        let lastGeneratedInvite = '';
+
+        function handleLogoTap() {
+            logoTapCount++;
+            clearTimeout(logoTapTimer);
+            logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 1500);
+            if (logoTapCount >= 5) {
+                logoTapCount = 0;
+                openAdminAuth();
+            }
+        }
+
+        function openAdminAuth() {
+            const pass = prompt('أدخل كلمة مرور الإدارة:');
+            if (pass === ADMIN_PASSWORD) {
+                document.getElementById('loginView').classList.add('hidden');
+                document.getElementById('homeView').classList.add('hidden');
+                document.getElementById('gameView').classList.add('hidden');
+                document.getElementById('resultView').classList.add('hidden');
+                document.getElementById('adminView').classList.remove('hidden');
+                fetchAllCodes();
+            } else if (pass !== null) {
+                alert('كلمة المرور غير صحيحة!');
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminView').classList.add('hidden');
+            if (currentStudent.code) {
+                enterAppDashboard();
+            } else {
+                showLoginScreen();
+            }
+        }
+
+        async function createNewStudentCode() {
+            const nameInput = document.getElementById('newStudentName');
+            const name = nameInput.value.trim();
+            if (!name) {
+                alert('اكتب اسم الطالب أولاً!');
+                return;
+            }
+
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            const newCode = `SA-${randomNum}`;
+
+            const { error } = await supabaseClient
+                .from('student_codes')
+                .insert([{ code: newCode, student_name: name }]);
+
+            if (error) {
+                alert('حدث خطأ أثناء إنشاء الكود: ' + error.message);
+                return;
+            }
+
+            nameInput.value = '';
+            document.getElementById('generatedCodeBox').classList.remove('hidden');
+            document.getElementById('generatedCodeText').textContent = newCode;
+
+            const siteUrl = window.location.href.split('?')[0];
+            lastGeneratedInvite = `أهلاً بك يا بطل (${name}) في منصة مدرسة أم سامح لجدول الضرب! 🏫🌟\n\nكود الاشتراك الخاص بك هو: *${newCode}*\nرابط الدخول للمنصة:\n${siteUrl}\n\nبالتوفيق يا بطل الرياضيات! 🚀`;
+
+            fetchAllCodes();
+        }
+
+        function copyInviteMessage() {
+            if (!lastGeneratedInvite) return;
+            navigator.clipboard.writeText(lastGeneratedInvite);
+            alert('تم نسخ رسالة التفعيل! الصقها الآن في محادثة الطالب على واتساب ✅');
+        }
+
+        async function fetchAllCodes() {
+            const listEl = document.getElementById('adminCodesList');
+            listEl.innerHTML = '<div class="text-center text-xs font-bold text-slate-400 py-4">جاري التحميل...</div>';
+
+            const { data, error } = await supabaseClient
+                .from('student_codes')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error || !data) {
+                listEl.innerHTML = '<div class="text-center text-xs font-bold text-rose-500">تعذر جلب البيانات</div>';
+                return;
+            }
+
+            document.getElementById('totalSubscribersCount').textContent = toAr(data.length);
+            listEl.innerHTML = '';
+
+            data.forEach(row => {
+                const item = document.createElement('div');
+                item.className = 'bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between gap-2';
+                item.innerHTML = `
+                    <div>
+                        <div class="font-black text-slate-800 text-sm">${row.student_name} <span dir="ltr" class="bg-sky-100 text-sky-800 px-2 py-0.5 rounded-lg text-xs ml-1">${row.code}</span></div>
+                        <div class="text-xs font-bold text-slate-500 mt-0.5">المستوى: ${toAr(row.unlocked_level)} | النجوم: ${toAr(row.stars)} ⭐</div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="toggleCodeStatus('${row.code}', ${!row.is_active})" class="px-2.5 py-1.5 rounded-xl text-xs font-black ${row.is_active ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                            ${row.is_active ? 'إيقاف' : 'تفعيل'}
+                        </button>
+                        <button onclick="deleteStudentCode('${row.code}')" class="px-2.5 py-1.5 rounded-xl text-xs font-black bg-rose-100 text-rose-700">
+                            حذف
+                        </button>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        async function toggleCodeStatus(code, newState) {
+            await supabaseClient.from('student_codes').update({ is_active: newState }).eq('code', code);
+            fetchAllCodes();
+        }
+
+        async function deleteStudentCode(code) {
+            if (!confirm(`هل أنت متأكد من حذف الكود ${code} نهائياً؟`)) return;
+            await supabaseClient.from('student_codes').delete().eq('code', code);
+            fetchAllCodes();
+        }
+
+        // ==========================================
+        // 3. WEB AUDIO API (FUN SOUND EFFECTS)
         // ==========================================
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
 
         function playTone(freq, type, duration, delay = 0) {
-            if (!userData.soundEnabled) return;
+            if (!currentStudent.soundEnabled) return;
             if (!audioCtx) audioCtx = new AudioCtx();
             if (audioCtx.state === 'suspended') audioCtx.resume();
 
@@ -479,12 +869,13 @@
         }
 
         function toggleSound() {
-            userData.soundEnabled = !userData.soundEnabled;
-            saveUserData();
+            currentStudent.soundEnabled = !currentStudent.soundEnabled;
+            localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(currentStudent));
+            updateDashboardUI();
         }
 
         // ==========================================
-        // 3. DASHBOARD & LEVELS RENDERING
+        // 4. DASHBOARD & LEVELS RENDERING
         // ==========================================
         const RANKS = [
             { minStars: 0, title: 'مبتدئ ذكي 🌱' },
@@ -503,11 +894,11 @@
         }
 
         function updateDashboardUI() {
-            document.getElementById('headerStars').textContent = toAr(userData.stars);
-            document.getElementById('headerRank').textContent = getRank(userData.stars);
-            document.getElementById('soundBtn').textContent = userData.soundEnabled ? '🔊' : '🔇';
+            document.getElementById('headerStars').textContent = toAr(currentStudent.stars);
+            document.getElementById('headerRank').textContent = getRank(currentStudent.stars);
+            document.getElementById('soundBtn').textContent = currentStudent.soundEnabled ? '🔊' : '🔇';
 
-            const mastered = userData.masteredTables.length;
+            const mastered = currentStudent.mastered_tables.length;
             document.getElementById('masteredCount').textContent = toAr(mastered);
             const pct = Math.round((mastered / 12) * 100);
             document.getElementById('progressPercent').textContent = `${toAr(pct)}٪`;
@@ -521,8 +912,8 @@
             grid.innerHTML = '';
 
             for (let t = 1; t <= 12; t++) {
-                const isUnlocked = t <= userData.unlockedLevel;
-                const isMastered = userData.masteredTables.includes(t);
+                const isUnlocked = t <= currentStudent.unlocked_level;
+                const isMastered = currentStudent.mastered_tables.includes(t);
 
                 const btn = document.createElement('button');
                 btn.className = `btn-3d rounded-2xl p-4 flex flex-col items-center justify-center relative transition ${
@@ -538,7 +929,7 @@
                 } else {
                     btn.onclick = () => {
                         sfxWrong();
-                        alert(`🔒 المستوى ${toAr(t)} مغلق حالياً! أتقن جدول ${toAr(userData.unlockedLevel)} أولاً لتفتحه.`);
+                        alert(`🔒 المستوى ${toAr(t)} مغلق حالياً! أتقن جدول ${toAr(currentStudent.unlocked_level)} أولاً لتفتحه.`);
                     };
                 }
 
@@ -563,7 +954,7 @@
         }
 
         // ==========================================
-        // 4. MODALS & CUSTOM SELECTION
+        // 5. MODALS & CUSTOM SELECTION
         // ==========================================
         let selectedSingleTable = 1;
         let customSelectedTables = [2, 7, 8];
@@ -655,7 +1046,7 @@
         }
 
         // ==========================================
-        // 5. GAME ENGINE & QUESTION GENERATOR
+        // 6. GAME ENGINE & QUESTION GENERATOR
         // ==========================================
         let gameConfig = {
             type: 'single',
@@ -753,6 +1144,7 @@
         }
 
         function launchGame({ type, tables, order, questions, label }) {
+            verifyActiveSession();
             gameConfig = {
                 ...gameConfig,
                 type,
@@ -958,9 +1350,9 @@
         }
 
         // ==========================================
-        // 6. END OF ROUND & PROGRESSION UNLOCK
+        // 7. END OF ROUND & CLOUD SYNC
         // ==========================================
-        function finishGame() {
+        async function finishGame() {
             document.getElementById('gameView').classList.add('hidden');
             document.getElementById('resultView').classList.remove('hidden');
 
@@ -968,21 +1360,21 @@
             const correct = gameConfig.correctCount;
             const accuracy = correct / total;
 
-            userData.stars += gameConfig.earnedStars;
+            currentStudent.stars += gameConfig.earnedStars;
 
             let unlockedNew = false;
             if (gameConfig.type === 'single' && accuracy >= 0.8) {
                 const t = gameConfig.tables[0];
-                if (!userData.masteredTables.includes(t)) {
-                    userData.masteredTables.push(t);
+                if (!currentStudent.mastered_tables.includes(t)) {
+                    currentStudent.mastered_tables.push(t);
                 }
-                if (t === userData.unlockedLevel && userData.unlockedLevel < 12) {
-                    userData.unlockedLevel++;
+                if (t === currentStudent.unlocked_level && currentStudent.unlocked_level < 12) {
+                    currentStudent.unlocked_level++;
                     unlockedNew = true;
                 }
             }
 
-            saveUserData();
+            await syncProgressToCloud();
 
             document.getElementById('resCorrect').textContent = `${toAr(correct)}/${toAr(total)}`;
             document.getElementById('resStars').textContent = `+${toAr(gameConfig.earnedStars)} ⭐`;
@@ -1004,7 +1396,7 @@
             }
 
             if (unlockedNew) {
-                unlockBanner.textContent = `🔓 مبروك! تم فتح جدول ضرب ${toAr(userData.unlockedLevel)} بنجاح!`;
+                unlockBanner.textContent = `🔓 مبروك! تم فتح جدول ضرب ${toAr(currentStudent.unlocked_level)} بنجاح!`;
                 unlockBanner.classList.remove('hidden');
                 nextBtn.classList.remove('hidden');
             } else if (gameConfig.type === 'single' && accuracy >= 0.8 && gameConfig.tables[0] < 12) {
@@ -1043,22 +1435,8 @@
             updateDashboardUI();
         }
 
-        function resetProgress() {
-            if (confirm('هل أنت متأكد من مسح النجوم والمستويات المفتوحة والبدء من جديد؟')) {
-                localStorage.removeItem(STORAGE_KEY);
-                userData = {
-                    stars: 0,
-                    unlockedLevel: 1,
-                    masteredTables: [],
-                    soundEnabled: true
-                };
-                saveUserData();
-            }
-        }
-
-        // Initialize App on Load
-        loadUserData();
-        updateDashboardUI();
+        // Start App
+        initAuth();
     </script>
 </body>
 </html>
