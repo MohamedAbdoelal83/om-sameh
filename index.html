@@ -117,7 +117,7 @@
 
                 <div class="space-y-3 text-right" id="loginFormContainer">
                     <label id="codeLabel" class="block text-xs font-extrabold text-slate-600 pr-1">كود الطالب السري:</label>
-                    <input id="codeInput" type="text" placeholder="مثال: SA-4821" dir="ltr" class="w-full text-center uppercase tracking-widest font-black text-xl py-3.5 px-4 rounded-2xl bg-slate-50 border-3 border-sky-300 focus:border-sky-500 focus:outline-none text-slate-800" />
+                    <input id="codeInput" type="text" placeholder="مثال: 7K9M2X" dir="ltr" class="w-full text-center uppercase tracking-widest font-black text-xl py-3.5 px-4 rounded-2xl bg-slate-50 border-3 border-sky-300 focus:border-sky-500 focus:outline-none text-slate-800" />
                     
                     <button id="loginBtn" onclick="loginWithCode()" class="btn-3d w-full bg-gradient-to-l from-emerald-500 to-teal-600 border-emerald-700 text-white font-black py-4 rounded-2xl text-lg shadow-lg hover:brightness-105">
                         دخول للمنصة 🚀
@@ -149,7 +149,7 @@
                         <span class="inline-block bg-emerald-100 text-emerald-700 font-extrabold text-xs px-3 py-1 rounded-full">
                             ☁️ <span id="syncText">حسابك محمي ومحفوظ سحابياً</span> (<span id="badgeCode" dir="ltr"></span>)
                         </span>
-                        <h2 class="text-2xl sm:text-3xl font-black text-slate-800"><span id="welcomeText">أهلاً يا</span> <span id="welcomeStudentName" class="text-sky-600">بطل</span>! 🚀</h2>
+                        <h2 class="text-2xl sm:text-3xl font-black text-slate-800"><span id="welcomeText">أهلاً يا</span> <span id="welcomeHeroTitle" class="text-sky-600">بطل</span> <span id="welcomeStudentName" class="text-sky-600">محمد</span>! 🚀</h2>
                         <p id="homeSub" class="text-slate-600 font-semibold text-sm sm:text-base">
                             أكمل الجداول بالترتيب لتفتح المستويات التالية، أو اصنع تحديك الخاص!
                         </p>
@@ -199,7 +199,7 @@
                         <span class="text-3xl animate-bounce">🌟</span>
                         <div>
                             <h4 id="dailyCardTitle" class="font-black text-amber-900 text-base">تحدي الذكاء اليومي</h4>
-                            <p id="dailyCardSub" class="text-xs font-bold text-slate-600 mt-0.5">سؤال ذكاء جديد كل يوم (+٥ نجوم)</p>
+                            <p id="dailyCardSub" class="text-xs font-bold text-slate-600 mt-0.5">سؤالان ذكاء بدون كتابة (+١٠ نجوم)</p>
                         </div>
                     </div>
                     <button onclick="openDailyChallenge()" class="btn-3d bg-amber-500 border-amber-700 text-white font-black px-4 py-2.5 rounded-2xl text-xs sm:text-sm whitespace-nowrap">
@@ -363,7 +363,7 @@
             </div>
         </section>
 
-        <!-- VIEW 6: ADMIN PANEL (HIDDEN TRIPLE-7 CLICK) -->
+        <!-- VIEW 6: ADMIN PANEL (HOLD FOOTER 7 SECONDS) -->
         <section id="adminView" class="hidden space-y-5 animate-pop">
             <div class="card-glass rounded-3xl p-6 space-y-5">
                 <div class="flex items-center justify-between border-b-2 border-slate-100 pb-3">
@@ -376,9 +376,15 @@
 
                 <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-4 space-y-3">
                     <h3 class="font-black text-sky-900 text-sm">➕ إصدار كود اشتراك جديد (٥٠ ريال)</h3>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <input id="newStudentName" type="text" placeholder="اسم الطالب (مثلاً: عمر محمد)" class="flex-1 px-4 py-3 rounded-xl border-2 border-sky-300 font-bold text-sm focus:outline-none bg-white" />
-                        <button onclick="createNewStudentCode()" class="btn-3d bg-sky-600 border-sky-800 text-white font-black px-5 py-3 rounded-xl text-sm">توليد الكود 🎫</button>
+                    <div class="space-y-2">
+                        <input id="newStudentName" type="text" placeholder="اسم الطالب (مثلاً: عمر محمد)" class="w-full px-4 py-3 rounded-xl border-2 border-sky-300 font-bold text-sm focus:outline-none bg-white" />
+                        <div class="flex gap-2">
+                            <select id="newStudentGender" class="px-4 py-3 rounded-xl border-2 border-sky-300 font-bold text-sm bg-white">
+                                <option value="batal">بطل ⚡ (ولد)</option>
+                                <option value="batla">بطلة 🌸 (بنت)</option>
+                            </select>
+                            <button onclick="createNewStudentCode()" class="btn-3d flex-1 bg-sky-600 border-sky-800 text-white font-black py-3 rounded-xl text-sm">توليد الكود الآمن 🎫</button>
+                        </div>
                     </div>
                     <div id="generatedCodeBox" class="hidden bg-white border-2 border-emerald-400 rounded-xl p-3 text-center space-y-2">
                         <div class="text-xs font-bold text-slate-500">تم إنشاء الكود بنجاح! انسخ الكود بضغطة زر:</div>
@@ -399,9 +405,10 @@
 
     </main>
 
-    <!-- Footer with Hidden 7-Clicks Admin Trigger -->
+    <!-- Footer with Hold 7-Seconds Admin Trigger -->
     <footer class="mt-12 py-4 border-t border-slate-200 text-center text-xs font-bold text-slate-400">
-        <span id="footerText" class="cursor-pointer hover:text-sky-600 transition" onclick="handleFooterClick()">
+        <span id="footerText" class="cursor-pointer hover:text-sky-600 transition select-none" 
+              onmousedown="startHoldAdmin()" onmouseup="cancelHoldAdmin()" ontouchstart="startHoldAdmin()" ontouchend="cancelHoldAdmin()">
             جميع الحقوق محفوظة © مدرسة أم سامح 2026
         </span>
     </footer>
@@ -413,19 +420,19 @@
         const SUPABASE_URL = 'https://flubqhplskwccgjftynb.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_MWwb8PZvc0uuW65mOnLgPQ_1MxobdqI';
         const WHATSAPP_NUMBER = '201018984311';
-        const ADMIN_SECRET = '252009';
+        const ADMIN_SECRET = '2529';
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const LOCAL_SESSION_KEY = 'om_sameh_auth_v4';
+        const LOCAL_SESSION_KEY = 'om_sameh_auth_v5';
 
         let currentLang = 'ar';
-        let footerClicks = 0;
-        let footerTimer = null;
+        let holdTimer = null;
         let sessionInterval = null;
 
         let currentStudent = {
             code: '',
             student_name: '',
+            gender: 'batal',
             session_id: '',
             stars: 0,
             unlocked_level: 1,
@@ -470,7 +477,7 @@
                 heroTitle: 'الجدول كله عشوائي',
                 heroSub: 'أسئلة شاملة من ١ إلى ١٢ لكسب مضاعف النقاط',
                 dailyCardTitle: 'تحدي الذكاء اليومي',
-                dailyCardSub: 'سؤال ذكاء رياضي جديد كل يوم (+٥ نجوم)',
+                dailyCardSub: 'سؤالان ذكاء بدون كتابة (+١٠ نجوم)',
                 leaderCardTitle: 'لوحة شرف الأبطال',
                 leaderCardSub: 'تعرف على ترتيب الأول على المدرسة',
                 mapTitle: 'خريطة المستويات (١ - ١٢)',
@@ -505,7 +512,7 @@
                 heroTitle: 'All Tables Random',
                 heroSub: 'Comprehensive questions from 1 to 12 for bonus stars',
                 dailyCardTitle: 'Daily Smart Challenge',
-                dailyCardSub: 'New smart math puzzle daily (+5 stars)',
+                dailyCardSub: '2 smart math puzzles without typing (+10 stars)',
                 leaderCardTitle: 'Heroes Leaderboard',
                 leaderCardSub: 'Check top ranked school heroes',
                 mapTitle: 'Levels Map (1 - 12)',
@@ -608,6 +615,7 @@
                 currentStudent = {
                     code: data.code,
                     student_name: data.student_name,
+                    gender: data.gender || 'batal',
                     session_id: newSession,
                     stars: data.stars || 0,
                     unlocked_level: data.unlocked_level || 1,
@@ -641,7 +649,9 @@
             document.getElementById('homeView').classList.remove('hidden');
             document.getElementById('headerStats').classList.remove('hidden');
 
-            document.getElementById('headerStudentName').textContent = `${currentLang==='ar'?'البطل':'Hero'}: ${currentStudent.student_name}`;
+            const heroTitle = currentStudent.gender === 'batla' ? (currentLang==='ar'?'بطلة':'Heroine') : (currentLang==='ar'?'بطل':'Hero');
+            document.getElementById('welcomeHeroTitle').textContent = heroTitle;
+            document.getElementById('headerStudentName').textContent = `${heroTitle}: ${currentStudent.student_name}`;
             document.getElementById('welcomeStudentName').textContent = currentStudent.student_name;
             document.getElementById('badgeCode').textContent = currentStudent.code;
 
@@ -687,11 +697,11 @@
         }
 
         // ==========================================
-        // 3. LEADERBOARD & DAILY SMART CHALLENGE
+        // 3. LEADERBOARD & DAILY SMART CHALLENGE (NO TYPING)
         // ==========================================
         async function openLeaderboard() {
             Swal.fire({ title: currentLang==='ar'?'جاري تحميل لوحة الشرف...':'Loading Leaderboard...', didOpen: () => Swal.showLoading() });
-            const { data } = await supabaseClient.from('student_codes').select('student_name, stars, unlocked_level').order('stars', { ascending: false }).limit(10);
+            const { data } = await supabaseClient.from('student_codes').select('student_name, stars, unlocked_level, gender').order('stars', { ascending: false }).limit(10);
             
             if (!data) { Swal.fire('تعذّر جلب لوحة الشرف'); return; }
 
@@ -699,12 +709,13 @@
             data.forEach((st, idx) => {
                 let medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx+1}`;
                 let bg = idx === 0 ? 'bg-amber-100 border-amber-300' : idx === 1 ? 'bg-slate-100 border-slate-300' : idx === 2 ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-100';
+                let icon = st.gender === 'batla' ? '🌸' : '⚡';
                 html += `
                     <div class="flex items-center justify-between p-3 rounded-2xl border-2 ${bg}">
                         <div class="flex items-center gap-3">
                             <span class="text-2xl font-black">${medal}</span>
                             <div>
-                                <div class="font-black text-slate-800">${st.student_name}</div>
+                                <div class="font-black text-slate-800">${icon} ${st.student_name}</div>
                                 <div class="text-xs text-slate-500 font-bold">${currentLang==='ar'?'المستوى':'Level'} ${toAr(st.unlocked_level)}</div>
                             </div>
                         </div>
@@ -725,63 +736,88 @@
             if (currentStudent.last_daily_date === todayStr) {
                 Swal.fire({
                     icon: 'info',
-                    title: currentLang==='ar'?'أنجزت تحدي اليوم! 🎉':'Completed Today\'s Challenge!',
-                    text: currentLang==='ar'?'لقد حللت سؤال الذكاء اليومي بالفعل. انتظر تحدي جديد غداً!':'You already solved today\'s puzzle. Come back tomorrow!'
+                    title: currentLang==='ar'?'أنجزت تحدي اليوم بالفعل! 🎉':'Already Completed Today!',
+                    text: currentLang==='ar'?'لقد شاركت في تحدي اليوم. انتظر تحدي جديد غداً!':'You already solved today\'s puzzle. Come back tomorrow!'
                 });
                 return;
             }
 
-            // Smart math puzzle generation based on day of year
-            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-            const pA = (dayOfYear % 8) + 3;
-            const pB = (dayOfYear % 6) + 4;
-            const pC = (dayOfYear % 5) + 2;
-            const correctAns = (pA * pB) + pC;
+            // Question 1: (6 x 7) + 8 = 50
+            // Question 2: (9 x 4) - 6 = 30
+            const qList = [
+                { q: '٦ × ٧ + ٨ = ؟', ans: 50, choices: [42, 50, 56, 48] },
+                { q: '٩ × ٤ - ٦ = ؟', ans: 30, choices: [30, 36, 28, 32] }
+            ];
 
-            const { value: userAns } = await Swal.fire({
-                title: currentLang==='ar'?'🌟 تحدي الذكاء الرياضي اليومي':'🌟 Daily Smart Math Puzzle',
-                html: `<div class="text-2xl font-black text-indigo-700 my-3" dir="ltr">${pA} × ${pB} + ${pC} = ؟</div>
-                       <p class="text-sm font-bold text-slate-600">${currentLang==='ar'?'أوجد ناتج العملية المركبة (الضرب أولاً ثم الجمع):':'Calculate the expression (multiplication first):'}</p>`,
-                input: 'number',
-                inputAttributes: { autocapitalize: 'off' },
-                confirmButtonText: currentLang==='ar'?'تحقق من الإجابة ✓':'Check Answer ✓',
-                showCancelButton: true,
-                cancelButtonText: currentLang==='ar'?'إلغاء':'Cancel'
-            });
+            let qIdx = 0;
+            let correctCount = 0;
 
-            if (userAns !== undefined && userAns !== '') {
-                if (parseInt(userAns, 10) === correctAns) {
-                    currentStudent.stars += 5;
+            const askQuestion = async () => {
+                if (qIdx >= qList.length) {
+                    currentStudent.stars += 10;
                     currentStudent.last_daily_date = todayStr;
                     await syncCloud();
-                    confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+                    confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
                     Swal.fire({
                         icon: 'success',
-                        title: currentLang==='ar'?'إجابة عبقرية! +٥ نجوم ⭐':'Genius Answer! +5 Stars ⭐',
-                        text: currentLang==='ar'?'تم إضافة النجوم لرصيدك بنجاح!':'Stars added successfully!'
+                        title: currentLang==='ar'?'إجابات عبقرية! +١٠ نجوم ⭐':'Genius Answers! +10 Stars ⭐',
+                        text: currentLang==='ar'?'تم إضافة النجوم لرصيدك بنجاح ولا يمكنك إعادة التحدي إلا غداً.':'Stars added successfully!'
                     });
-                } else {
-                    sfxWrong();
-                    Swal.fire({
-                        icon: 'error',
-                        title: currentLang==='ar'?'إجابة غير صحيحة!':'Incorrect!',
-                        text: currentLang==='ar'?`الإجابة الصحيحة هي: ${toAr(correctAns)}. حاول في تحدي آخر!`:`Correct answer was ${correctAns}.`
-                    });
+                    return;
                 }
-            }
+
+                const currentQ = qList[qIdx];
+                const shuffledOpts = shuffle(currentQ.choices);
+
+                const { value: selected } = await Swal.fire({
+                    title: currentLang==='ar' ? `🌟 تحدي الذكاء اليومي (سؤال ${toAr(qIdx+1)} من ٢)` : `Daily Challenge (${qIdx+1}/2)`,
+                    html: `<div class="text-3xl font-black text-indigo-700 my-4" dir="ltr">${currentQ.q}</div>`,
+                    input: 'radio',
+                    inputOptions: {
+                        [shuffledOpts[0]]: toAr(shuffledOpts[0]),
+                        [shuffledOpts[1]]: toAr(shuffledOpts[1]),
+                        [shuffledOpts[2]]: toAr(shuffledOpts[2]),
+                        [shuffledOpts[3]]: toAr(shuffledOpts[3])
+                    },
+                    inputValidator: (val) => {
+                        if (!val) return 'اختر إجابة من فضلك!';
+                    },
+                    confirmButtonText: currentLang==='ar'?'التالي ✓':'Next ✓',
+                    allowOutsideClick: false
+                });
+
+                if (selected !== undefined) {
+                    if (parseInt(selected, 10) === currentQ.ans) {
+                        correctCount++;
+                        qIdx++;
+                        askQuestion();
+                    } else {
+                        sfxWrong();
+                        currentStudent.last_daily_date = todayStr; // Block for today even if failed
+                        await syncCloud();
+                        Swal.fire({
+                            icon: 'error',
+                            title: currentLang==='ar'?'إجابة خاطئة!':'Incorrect!',
+                            text: currentLang==='ar'?'للأسف انتهى تحدي اليوم. حاول غداً بنشاط أكبر!':'Challenge ended. Try tomorrow!'
+                        });
+                    }
+                }
+            };
+
+            askQuestion();
         }
 
         // ==========================================
-        // 4. SECRET 7-CLICKS ADMIN TRIGGER
+        // 4. HOLD 7 SECONDS ADMIN TRIGGER
         // ==========================================
-        function handleFooterClick() {
-            footerClicks++;
-            clearTimeout(footerTimer);
-            footerTimer = setTimeout(() => { footerClicks = 0; }, 2000);
-            if (footerClicks >= 7) {
-                footerClicks = 0;
+        function startHoldAdmin() {
+            holdTimer = setTimeout(() => {
                 promptAdminAuth();
-            }
+            }, 7000);
+        }
+
+        function cancelHoldAdmin() {
+            if (holdTimer) clearTimeout(holdTimer);
         }
 
         async function promptAdminAuth() {
@@ -810,24 +846,34 @@
             else showLoginScreen();
         }
 
+        function generateSecureCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No similar chars like O/0, I/1
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
         async function createNewStudentCode() {
             const name = document.getElementById('newStudentName').value.trim();
+            const gender = document.getElementById('newStudentGender').value;
             if (!name) { Swal.fire({icon:'warning', title:'اكتب اسم الطالب'}); return; }
-            const code = `SA-${Math.floor(1000 + Math.random() * 9000)}`;
-            const { error } = await supabaseClient.from('student_codes').insert([{ code, student_name: name }]);
+            
+            const code = generateSecureCode();
+            const { error } = await supabaseClient.from('student_codes').insert([{ code, student_name: name, gender }]);
             if (error) { Swal.fire({icon:'error', text:error.message}); return; }
             
             document.getElementById('newStudentName').value = '';
             document.getElementById('generatedCodeBox').classList.remove('hidden');
             document.getElementById('generatedCodeText').textContent = code;
             window.lastCleanCode = code;
-            window.lastInvite = `أهلاً بك يا بطل (${name}) في منصة مدرسة أم سامح لجدول الضرب! 🏫🌟\n\nكود الاشتراك الخاص بك: *${code}*\nرابط المنصة:\n${window.location.href.split('?')[0]}\n\nبالتوفيق! 🚀`;
             fetchAllCodes();
         }
 
         function copyCleanCode() {
             navigator.clipboard.writeText(window.lastCleanCode);
-            Swal.fire({ icon: 'success', title: 'تم نسخ الكود فقط!', text: window.lastCleanCode, timer: 1500, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: 'تم نسخ الكود الصافي بنجاح!', text: window.lastCleanCode, timer: 1500, showConfirmButton: false });
         }
 
         async function fetchAllCodes() {
@@ -838,10 +884,11 @@
             document.getElementById('totalSubscribersCount').textContent = toAr(data.length);
             listEl.innerHTML = '';
             data.forEach(row => {
+                let icon = row.gender === 'batla' ? '🌸' : '⚡';
                 const div = document.createElement('div');
                 div.className = 'bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between gap-2 text-sm';
                 div.innerHTML = `
-                    <div><b>${row.student_name}</b> <span class="bg-sky-100 text-sky-800 px-2 py-0.5 rounded text-xs ml-1">${row.code}</span>
+                    <div><b>${icon} ${row.student_name}</b> <span class="bg-sky-100 text-sky-800 px-2 py-0.5 rounded text-xs ml-1 font-mono">${row.code}</span>
                     <div class="text-xs text-slate-500 mt-0.5">المستوى: ${toAr(row.unlocked_level)} | النجوم: ${toAr(row.stars)} ⭐</div></div>
                     <div class="flex gap-1">
                         <button onclick="toggleCode('${row.code}', ${!row.is_active})" class="px-2.5 py-1 rounded text-xs font-black ${row.is_active?'bg-amber-100 text-amber-800':'bg-emerald-100 text-emerald-800'}">${row.is_active?'إيقاف':'تفعيل'}</button>
@@ -1058,7 +1105,7 @@
                 sfxCorrect();
                 gameConfig.correct++;
                 gameConfig.streak++;
-                currentStudent.stars += 2;
+                currentStudent.stars += 1; // Balanced normal score
                 ansBox.className = 'min-w-[90px] px-3 py-1 rounded-2xl bg-emerald-100 border-4 border-emerald-500 text-emerald-700 animate-pop';
                 btn.className = 'btn-3d bg-emerald-500 border-emerald-700 text-white font-black text-3xl py-4 rounded-2xl shadow';
                 setTimeout(nextQ, 900);
@@ -1100,7 +1147,7 @@
             Swal.fire({
                 icon: accuracy >= 0.8 ? 'success' : 'info',
                 title: accuracy >= 0.8 ? (currentLang==='ar'?'أداء أسطوري يا بطل! 🏆':'Legendary Performance! 🏆') : (currentLang==='ar'?'محاولة جيدة جداً! 💪':'Good Effort! 💪'),
-                html: `<b>${currentLang==='ar'?'النتيجة':'Score'}:</b> ${toAr(gameConfig.correct)} / ${toAr(gameConfig.questions.length)}<br><b>${currentLang==='ar'?'النجوم المكتسبة':'Stars Earned'}:</b> +${toAr(gameConfig.correct * 2)} ⭐${unlockedNew?'<br><b class="text-emerald-600">🔓 تم فتح المستوى التالي!</b>':''}`,
+                html: `<b>${currentLang==='ar'?'النتيجة':'Score'}:</b> ${toAr(gameConfig.correct)} / ${toAr(gameConfig.questions.length)}<br><b>${currentLang==='ar'?'النجوم المكتسبة':'Stars Earned'}:</b> +${toAr(gameConfig.correct)} ⭐${unlockedNew?'<br><b class="text-emerald-600">🔓 تم فتح المستوى التالي!</b>':''}`,
                 confirmButtonText: currentLang==='ar'?'الرئيسية 🏠':'Home 🏠'
             }).then(() => exitGame());
         }
