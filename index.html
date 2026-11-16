@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مدرسة أم سامح - أبطال جدول الضرب</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #fef3c7 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .btn-3d {
+            transition: all 0.1s ease;
+            border-bottom-width: 5px;
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(3px);
+            border-bottom-width: 2px;
+        }
+        .card-glass {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            border: 3px solid #ffffff;
+            box-shadow: 0 12px 28px -5px rgba(14, 116, 144, 0.15);
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.06); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: pop 0.3s ease-out forwards;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="text-slate-800 pb-10">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b-4 border-sky-200 shadow-sm px-4 py-3">
+        <div class="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white text-2xl font-black shadow-md animate-float">
+                    🏫
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-black text-sky-900 leading-tight">مدرسة أم سامح</h1>
+                    <p class="text-xs sm:text-sm font-bold text-amber-600">مغامرة أبطال جدول الضرب</p>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="bg-amber-100 border-2 border-amber-300 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 shadow-inner">
+                    <span class="text-lg">⭐</span>
+                    <span id="headerStars" class="font-black text-amber-800 text-base sm:text-lg">0</span>
+                </div>
+                <div class="bg-purple-100 border-2 border-purple-300 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 shadow-inner">
+                    <span class="text-lg">🏆</span>
+                    <span id="headerRank" class="font-extrabold text-purple-800 text-xs sm:text-sm">مبتدئ ذكي</span>
+                </div>
+                <button onclick="toggleSound()" id="soundBtn" class="w-10 h-10 rounded-2xl bg-sky-100 border-2 border-sky-300 flex items-center justify-center text-lg hover:bg-sky-200 transition" title="تشغيل/إيقاف الصوت">
+                    🔊
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-3xl mx-auto px-4 pt-6">
+
+        <!-- VIEW 1: HOME / DASHBOARD -->
+        <section id="homeView" class="space-y-6 animate-pop">
+            
+            <!-- Welcome & Progress Banner -->
+            <div class="card-glass rounded-3xl p-5 sm:p-6 relative overflow-hidden">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="text-center sm:text-right space-y-1">
+                        <span class="inline-block bg-emerald-100 text-emerald-700 font-extrabold text-xs px-3 py-1 rounded-full">
+                            💾 تقدمك محفوظ تلقائياً على جهازك
+                        </span>
+                        <h2 class="text-2xl sm:text-3xl font-black text-slate-800">أهلاً بك يا بطل الرياضيات! 🚀</h2>
+                        <p class="text-slate-600 font-semibold text-sm sm:text-base">
+                            أكمل الجداول بالترتيب لتفتح المستويات التالية، أو اصنع تحديك الخاص!
+                        </p>
+                    </div>
+                    <div class="bg-gradient-to-br from-sky-500 to-indigo-600 text-white p-4 rounded-2xl text-center min-w-[130px] shadow-lg">
+                        <div class="text-xs font-bold opacity-90">الجداول المتقنة</div>
+                        <div class="text-3xl font-black mt-0.5"><span id="masteredCount">0</span> / 12</div>
+                    </div>
+                </div>
+
+                <!-- Overall Progress Bar -->
+                <div class="mt-5">
+                    <div class="flex justify-between text-xs font-extrabold text-slate-600 mb-1.5">
+                        <span>طريق البطولة</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="w-full h-4 bg-slate-200 rounded-full overflow-hidden p-0.5 border border-slate-300">
+                        <div id="overallProgressBar" class="h-full bg-gradient-to-l from-emerald-400 to-teal-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Mode Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Custom Multi-Table Challenge -->
+                <button onclick="openCustomModal()" class="btn-3d bg-gradient-to-l from-orange-500 to-amber-500 border-orange-700 text-white rounded-3xl p-5 text-right flex items-center justify-between shadow-lg hover:brightness-105">
+                    <div>
+                        <div class="bg-white/20 inline-block px-2.5 py-0.5 rounded-lg text-xs font-bold mb-1">تحدي مخصص 🎯</div>
+                        <h3 class="text-xl font-black">اختر جداولك بنفسك</h3>
+                        <p class="text-xs sm:text-sm font-semibold text-amber-50 mt-1">مثلاً: جدول 2 و 7 و 8 معاً عشوائياً!</p>
+                    </div>
+                    <span class="text-4xl">🎲</span>
+                </button>
+
+                <!-- All Tables Random Marathon -->
+                <button onclick="startAllRandom()" class="btn-3d bg-gradient-to-l from-purple-600 to-indigo-600 border-indigo-800 text-white rounded-3xl p-5 text-right flex items-center justify-between shadow-lg hover:brightness-105">
+                    <div>
+                        <div class="bg-white/20 inline-block px-2.5 py-0.5 rounded-lg text-xs font-bold mb-1">تحدي الأبطال ⚡</div>
+                        <h3 class="text-xl font-black">الجدول كله عشوائي</h3>
+                        <p class="text-xs sm:text-sm font-semibold text-indigo-100 mt-1">أسئلة شاملة من 1 إلى 12 لكسب مضاعف النقاط</p>
+                    </div>
+                    <span class="text-4xl">🔥</span>
+                </button>
+            </div>
+
+            <!-- Levels Grid (Tables 1 to 12) -->
+            <div class="card-glass rounded-3xl p-5 sm:p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-black text-slate-800 flex items-center gap-2">
+                        <span>🗺️</span> خريطة المستويات (1 - 12)
+                    </h3>
+                    <span class="text-xs font-bold text-slate-500">اضغط على المستوى للبدء</span>
+                </div>
+
+                <div id="levelsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
+                    <!-- Generated via JS -->
+                </div>
+            </div>
+
+            <!-- Reset Option -->
+            <div class="text-center pt-2">
+                <button onclick="resetProgress()" class="text-xs font-bold text-slate-400 hover:text-rose-500 underline transition">
+                    إعادة ضبط التقدم المحفوظ على هذا الهاتف
+                </button>
+            </div>
+        </section>
+
+        <!-- VIEW 2: LEVEL MODE SELECTOR MODAL -->
+        <div id="levelModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+            <div class="card-glass rounded-3xl max-w-md w-full p-6 space-y-5 animate-pop relative">
+                <button onclick="closeLevelModal()" class="absolute top-4 left-4 w-9 h-9 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 font-black flex items-center justify-center">✕</button>
+                
+                <div class="text-center space-y-1">
+                    <div id="modalTableBadge" class="w-16 h-16 mx-auto rounded-2xl bg-sky-500 text-white text-3xl font-black flex items-center justify-center shadow-md mb-2">
+                        5
+                    </div>
+                    <h3 id="modalTableTitle" class="text-2xl font-black text-slate-800">جدول ضرب 5</h3>
+                    <p class="text-sm font-bold text-slate-500">كيف تحب أن تتدرب اليوم؟</p>
+                </div>
+
+                <div class="space-y-3">
+                    <!-- Option 1: Study / Quick View -->
+                    <button onclick="openStudySheet()" class="btn-3d w-full bg-amber-100 border-amber-300 text-amber-900 rounded-2xl p-4 flex items-center justify-between hover:bg-amber-200">
+                        <div class="text-right">
+                            <div class="font-black text-base">📖 راجع الجدول أولاً</div>
+                            <div class="text-xs font-bold text-amber-700">اقرأ الجدول بتركيز قبل التحدي</div>
+                        </div>
+                        <span class="text-2xl">👀</span>
+                    </button>
+
+                    <!-- Option 2: Ordered -->
+                    <button onclick="startSingleTable('ordered')" class="btn-3d w-full bg-sky-500 border-sky-700 text-white rounded-2xl p-4 flex items-center justify-between hover:brightness-105">
+                        <div class="text-right">
+                            <div class="font-black text-base">1️⃣ بالترتيب (من 1 إلى 12)</div>
+                            <div class="text-xs font-bold text-sky-100">ممتاز للحفظ خطوة بخطوة</div>
+                        </div>
+                        <span class="text-2xl">📶</span>
+                    </button>
+
+                    <!-- Option 3: Random -->
+                    <button onclick="startSingleTable('random')" class="btn-3d w-full bg-emerald-500 border-emerald-700 text-white rounded-2xl p-4 flex items-center justify-between hover:brightness-105">
+                        <div class="text-right">
+                            <div class="font-black text-base">🔀 عشوائي (اختبار الذكاء)</div>
+                            <div class="text-xs font-bold text-emerald-100">اجتز هذا التحدي لفتح المستوى التالي!</div>
+                        </div>
+                        <span class="text-2xl">🚀</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: STUDY SHEET MODAL -->
+        <div id="studyModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+            <div class="card-glass rounded-3xl max-w-md w-full p-6 space-y-4 animate-pop">
+                <div class="flex items-center justify-between border-b-2 border-slate-100 pb-3">
+                    <h3 id="studyTitle" class="text-xl font-black text-sky-900">مراجعة جدول 5</h3>
+                    <button onclick="closeStudySheet()" class="w-9 h-9 rounded-full bg-slate-100 font-black text-slate-600">✕</button>
+                </div>
+                <div id="studyGrid" class="grid grid-cols-2 gap-2.5 max-h-[60vh] overflow-y-auto p-1">
+                    <!-- Populated by JS -->
+                </div>
+                <button onclick="closeStudySheet(); startSingleTable('ordered');" class="btn-3d w-full bg-emerald-500 border-emerald-700 text-white font-black py-3.5 rounded-2xl text-lg">
+                    أنا جاهز للتحدي الآن! 💪
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 4: CUSTOM MULTI-TABLE SELECTOR MODAL -->
+        <div id="customModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+            <div class="card-glass rounded-3xl max-w-md w-full p-6 space-y-5 animate-pop relative">
+                <button onclick="closeCustomModal()" class="absolute top-4 left-4 w-9 h-9 rounded-full bg-slate-100 text-slate-600 font-black flex items-center justify-center">✕</button>
+                
+                <div class="text-center">
+                    <span class="text-3xl">🎯</span>
+                    <h3 class="text-2xl font-black text-slate-800 mt-1">اصنع تحديك الخاص</h3>
+                    <p class="text-sm font-bold text-slate-500">اختر الجداول التي تريد التدرب عليها معاً:</p>
+                </div>
+
+                <!-- Checkboxes 1-12 -->
+                <div id="customCheckboxes" class="grid grid-cols-4 gap-2.5">
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- Order Toggle -->
+                <div class="bg-slate-100 p-2 rounded-2xl flex gap-2">
+                    <button id="customRandomBtn" onclick="setCustomOrder('random')" class="flex-1 py-2 rounded-xl font-black text-sm bg-orange-500 text-white shadow">
+                        🔀 أسئلة عشوائية
+                    </button>
+                    <button id="customOrderedBtn" onclick="setCustomOrder('ordered')" class="flex-1 py-2 rounded-xl font-black text-sm text-slate-600">
+                        📶 بالترتيب
+                    </button>
+                </div>
+
+                <button onclick="startCustomQuiz()" class="btn-3d w-full bg-gradient-to-l from-orange-500 to-amber-500 border-orange-700 text-white font-black py-4 rounded-2xl text-xl shadow-lg">
+                    تم - ابدأ التحدي! 🚀
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 5: INTERACTIVE GAME ARENA -->
+        <section id="gameView" class="hidden space-y-5 animate-pop">
+            <!-- Top Bar -->
+            <div class="flex items-center justify-between bg-white/90 px-4 py-3 rounded-2xl shadow-sm border-2 border-sky-100">
+                <button onclick="exitGame()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold px-3.5 py-2 rounded-xl text-sm flex items-center gap-1">
+                    <span>🏠</span> خروج
+                </button>
+                
+                <div class="text-center">
+                    <div id="gameModeLabel" class="text-xs font-extrabold text-sky-600">جدول 5 - عشوائي</div>
+                    <div class="text-sm font-black text-slate-700">سؤال <span id="qCurrent">1</span> من <span id="qTotal">12</span></div>
+                </div>
+
+                <!-- Combo Streak Badge -->
+                <div id="streakBadge" class="bg-orange-100 border-2 border-orange-300 px-3 py-1.5 rounded-xl flex items-center gap-1 transition-transform">
+                    <span>🔥</span>
+                    <span id="streakCount" class="font-black text-orange-700 text-sm">0</span>
+                </div>
+            </div>
+
+            <!-- Question Progress Bar -->
+            <div class="w-full h-3 bg-white rounded-full overflow-hidden shadow-inner border border-sky-200">
+                <div id="gameProgressBar" class="h-full bg-gradient-to-l from-amber-400 to-orange-500 transition-all duration-300" style="width: 8%"></div>
+            </div>
+
+            <!-- Question Card -->
+            <div id="questionCard" class="card-glass rounded-3xl p-6 sm:p-8 text-center space-y-5 relative overflow-hidden">
+                <!-- Motivational Bubble -->
+                <div id="coachMessage" class="inline-block bg-sky-100 text-sky-800 font-extrabold text-sm px-4 py-1.5 rounded-full">
+                    ركز يا بطل.. كم يساوي حاصل الضرب؟ 🤔
+                </div>
+
+                <!-- Math Equation -->
+                <div dir="ltr" class="py-3 flex items-center justify-center gap-3 sm:gap-5 text-5xl sm:text-7xl font-black text-slate-800">
+                    <span id="numA" class="text-sky-600">7</span>
+                    <span class="text-amber-500 text-4xl sm:text-6xl">×</span>
+                    <span id="numB" class="text-indigo-600">8</span>
+                    <span class="text-slate-400 text-4xl sm:text-6xl">=</span>
+                    <span id="answerDisplay" class="min-w-[90px] sm:min-w-[120px] px-3 py-1 rounded-2xl bg-amber-50 border-4 border-dashed border-amber-400 text-orange-600">
+                        ؟
+                    </span>
+                </div>
+
+                <!-- Smart Visual Helper (Interactive Hint) -->
+                <div>
+                    <button onclick="toggleVisualHelper()" class="text-xs sm:text-sm font-extrabold text-purple-600 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-4 py-1.5 rounded-full transition inline-flex items-center gap-1.5">
+                        <span>💡</span> مش متأكد؟ شوف طريقة الحل الذكية
+                    </button>
+                    <div id="visualHelperBox" class="hidden mt-3 bg-purple-50/90 border-2 border-purple-200 rounded-2xl p-3.5 text-sm font-bold text-purple-900 animate-pop">
+                        <!-- Dynamic helper content -->
+                    </div>
+                </div>
+
+                <!-- Interactive Multiple Choice OR Keypad -->
+                <div id="choicesGrid" class="grid grid-cols-2 gap-3 pt-2">
+                    <!-- 4 Interactive Choice Buttons generated via JS -->
+                </div>
+
+                <!-- Toggle Keypad Mode -->
+                <div class="pt-1">
+                    <button onclick="toggleInputMode()" id="toggleInputBtn" class="text-xs font-bold text-slate-500 hover:text-sky-600 underline">
+                        التبديل إلى لوحة الأرقام (اكتب الإجابة بنفسك) ⌨️
+                    </button>
+                </div>
+
+                <!-- Custom Keypad (Hidden by default, toggleable) -->
+                <div id="keypadContainer" class="hidden max-w-xs mx-auto pt-2 space-y-2.5">
+                    <div class="grid grid-cols-3 gap-2" dir="ltr">
+                        <button onclick="pressKey(1)" class="btn-3d bg-white border-slate-300 text-slate-800 font-black text-2xl py-3 rounded-2xl">1</button>
+                        <button onclick="pressKey(2)" class="btn-3d bg-white border-slate-300 text-slate-800 font-black text-2xl py-3 rounded-2xl">2</button>
+                        <button onclick="pressKey(3)" class="btn-3d bg-white border-slate-300 text-slate-800 font-black text-2xl py-3 rounded-2xl">3</button>
+                        <button onclick="pressKey(4)" class="btn-3d bg-white border-slate-300 text-slate-800 font-black text-2xl py-3 rounded-2xl">4</button>
+                        <button onclick="pressKey(5)" class="btn-3d bg-white border-slate-300 text-slate-800 font-black text-2xl py-3 rounded-2xl">5</button>
+                        <button onclick="pressKey(6)" class="btn-3d bg-white border-slate-300 text-slate-800 font-black text-2xl py-3 rounded-2xl">6</button>
+                        <button onclick="pressKey(7)" class="btn-3d bg-white border-slate-300 text-slate-800 font-black text-2xl py-3 rounded-2xl">7</button>
+                        <button onclick="pressKey(8)" class="btn-3d bg-white border-slate-300 text-slate-800 font-black text-2xl py-3 rounded-2xl">8</button>
+                        <button onclick="pressKey(9)" class="btn-3d bg-white border-slate-300 text-slate-800 font-black text-2xl py-3 rounded-2xl">9</button>
+                        <button onclick="clearKey()" class="btn-3d bg-rose-100 border-rose-300 text-rose-700 font-black text-lg py-3 rounded-2xl">مسح</button>
+                        <button onclick="pressKey(0)" class="btn-3d bg-white border-slate-300 text-slate-800 font-black text-2xl py-3 rounded-2xl">0</button>
+                        <button onclick="submitKeypadAnswer()" class="btn-3d bg-emerald-500 border-emerald-700 text-white font-black text-lg py-3 rounded-2xl">تأكيد ✓</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 6: RESULTS & LEVEL UP CELEBRATION -->
+        <section id="resultView" class="hidden card-glass rounded-3xl p-6 sm:p-8 text-center space-y-6 animate-pop">
+            <div id="resultEmoji" class="text-6xl sm:text-7xl animate-bounce">🏆</div>
+            
+            <div class="space-y-1">
+                <h2 id="resultTitle" class="text-2xl sm:text-3xl font-black text-slate-800">أداء أسطوري يا بطل!</h2>
+                <p id="resultSubtitle" class="text-slate-600 font-bold text-sm sm:text-base">لقد أتممت التحدي بنجاح باهر</p>
+            </div>
+
+            <!-- Score Summary Boxes -->
+            <div class="grid grid-cols-3 gap-3 max-w-md mx-auto">
+                <div class="bg-emerald-50 border-2 border-emerald-200 p-3 rounded-2xl">
+                    <div class="text-xs font-bold text-emerald-700">إجابات صحيحة</div>
+                    <div id="resCorrect" class="text-2xl font-black text-emerald-600 mt-1">12/12</div>
+                </div>
+                <div class="bg-amber-50 border-2 border-amber-200 p-3 rounded-2xl">
+                    <div class="text-xs font-bold text-amber-700">نجوم مكتسبة</div>
+                    <div id="resStars" class="text-2xl font-black text-amber-600 mt-1">+25 ⭐</div>
+                </div>
+                <div class="bg-orange-50 border-2 border-orange-200 p-3 rounded-2xl">
+                    <div class="text-xs font-bold text-orange-700">أعلى حماس</div>
+                    <div id="resStreak" class="text-2xl font-black text-orange-600 mt-1">12 🔥</div>
+                </div>
+            </div>
+
+            <!-- Level Unlock Notice -->
+            <div id="unlockBanner" class="hidden bg-gradient-to-l from-emerald-500 to-teal-600 text-white p-4 rounded-2xl font-black text-base shadow-md">
+                🔓 رائع! تم فتح المستوى التالي بنجاح!
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                <button id="nextLevelBtn" onclick="playNextLevel()" class="hidden btn-3d bg-emerald-500 border-emerald-700 text-white font-black px-6 py-4 rounded-2xl text-lg flex-1">
+                    الانتقال للمستوى التالي ⬅️
+                </button>
+                <button onclick="replaySameGame()" class="btn-3d bg-sky-500 border-sky-700 text-white font-black px-6 py-4 rounded-2xl text-lg flex-1">
+                    العب مرة أخرى 🔄
+                </button>
+                <button onclick="goHome()" class="btn-3d bg-slate-200 border-slate-400 text-slate-800 font-black px-6 py-4 rounded-2xl text-lg flex-1">
+                    القائمة الرئيسية 🏠
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // ==========================================
+        // 1. STATE & LOCALSTORAGE PERSISTENCE
+        // ==========================================
+        const STORAGE_KEY = 'om_sameh_math_hero_v1';
+
+        let userData = {
+            stars: 0,
+            unlockedLevel: 1, // Tables 1 to 12 unlock progressively
+            masteredTables: [], // Array of table numbers completed with >= 80%
+            soundEnabled: true
+        };
+
+        function loadUserData() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    userData = { ...userData, ...JSON.parse(saved) };
+                }
+            } catch (e) {
+                console.warn('Storage read error:', e);
+            }
+        }
+
+        function saveUserData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+            } catch (e) {
+                console.warn('Storage save error:', e);
+            }
+            updateDashboardUI();
+        }
+
+        // ==========================================
+        // 2. WEB AUDIO API (FUN SOUND EFFECTS)
+        // ==========================================
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function playTone(freq, type, duration, delay = 0) {
+            if (!userData.soundEnabled) return;
+            if (!audioCtx) audioCtx = new AudioCtx();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+            
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime + delay);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(audioCtx.currentTime + delay);
+            osc.stop(audioCtx.currentTime + delay + duration);
+        }
+
+        function sfxCorrect() {
+            playTone(523.25, 'sine', 0.15, 0);    // C5
+            playTone(659.25, 'sine', 0.15, 0.08); // E5
+            playTone(783.99, 'sine', 0.25, 0.16); // G5
+        }
+
+        function sfxWrong() {
+            playTone(220, 'triangle', 0.2, 0);
+            playTone(185, 'triangle', 0.3, 0.15);
+        }
+
+        function sfxWin() {
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((n, i) => playTone(n, 'sine', 0.25, i * 0.12));
+        }
+
+        function toggleSound() {
+            userData.soundEnabled = !userData.soundEnabled;
+            saveUserData();
+        }
+
+        // ==========================================
+        // 3. DASHBOARD & LEVELS RENDERING
+        // ==========================================
+        const RANKS = [
+            { minStars: 0, title: 'مبتدئ ذكي 🌱' },
+            { minStars: 50, title: 'مستكشف الأرقام 🧭' },
+            { minStars: 150, title: 'فارس الحساب 🛡️' },
+            { minStars: 300, title: 'عبقري الرياضيات 🧠' },
+            { minStars: 500, title: 'أسطورة أم سامح 👑' }
+        ];
+
+        function getRank(stars) {
+            let current = RANKS[0].title;
+            for (const r of RANKS) {
+                if (stars >= r.minStars) current = r.title;
+            }
+            return current;
+        }
+
+        function updateDashboardUI() {
+            document.getElementById('headerStars').textContent = userData.stars;
+            document.getElementById('headerRank').textContent = getRank(userData.stars);
+            document.getElementById('soundBtn').textContent = userData.soundEnabled ? '🔊' : '🔇';
+
+            const mastered = userData.masteredTables.length;
+            document.getElementById('masteredCount').textContent = mastered;
+            const pct = Math.round((mastered / 12) * 100);
+            document.getElementById('progressPercent').textContent = `${pct}%`;
+            document.getElementById('overallProgressBar').style.width = `${pct}%`;
+
+            renderLevelsGrid();
+        }
+
+        function renderLevelsGrid() {
+            const grid = document.getElementById('levelsGrid');
+            grid.innerHTML = '';
+
+            for (let t = 1; t <= 12; t++) {
+                const isUnlocked = t <= userData.unlockedLevel;
+                const isMastered = userData.masteredTables.includes(t);
+
+                const btn = document.createElement('button');
+                btn.className = `btn-3d rounded-2xl p-4 flex flex-col items-center justify-center relative transition ${
+                    isMastered
+                        ? 'bg-gradient-to-b from-emerald-400 to-emerald-500 border-emerald-700 text-white shadow-md'
+                        : isUnlocked
+                        ? 'bg-white border-sky-300 text-slate-800 hover:bg-sky-50 shadow-sm'
+                        : 'bg-slate-200/80 border-slate-300 text-slate-400 cursor-not-allowed'
+                }`;
+
+                if (isUnlocked) {
+                    btn.onclick = () => openLevelModal(t);
+                } else {
+                    btn.onclick = () => {
+                        sfxWrong();
+                        alert(`🔒 المستوى ${t} مغلق حالياً! أتقن جدول ${userData.unlockedLevel} أولاً لتفتحه.`);
+                    };
+                }
+
+                const statusBadge = isMastered
+                    ? '<span class="absolute top-2 right-2 text-sm">⭐</span>'
+                    : !isUnlocked
+                    ? '<span class="absolute top-2 right-2 text-sm">🔒</span>'
+                    : '<span class="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>';
+
+                btn.innerHTML = `
+                    ${statusBadge}
+                    <span class="text-xs font-extrabold opacity-80">جدول</span>
+                    <span class="text-3xl font-black my-0.5">${t}</span>
+                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                        isMastered ? 'bg-white/25 text-white' : isUnlocked ? 'bg-sky-100 text-sky-700' : 'bg-slate-300 text-slate-500'
+                    }">
+                        ${isMastered ? 'مُتقن ✓' : isUnlocked ? 'متاح للعب' : 'مغلق'}
+                    </span>
+                `;
+                grid.appendChild(btn);
+            }
+        }
+
+        // ==========================================
+        // 4. MODALS & CUSTOM SELECTION
+        // ==========================================
+        let selectedSingleTable = 1;
+        let customSelectedTables = [2, 7, 8]; // Default fun suggestion
+        let customOrderMode = 'random';
+
+        function openLevelModal(tableNum) {
+            selectedSingleTable = tableNum;
+            document.getElementById('modalTableBadge').textContent = tableNum;
+            document.getElementById('modalTableTitle').textContent = `جدول ضرب ${tableNum}`;
+            document.getElementById('levelModal').classList.remove('hidden');
+            document.getElementById('levelModal').classList.add('flex');
+        }
+
+        function closeLevelModal() {
+            document.getElementById('levelModal').classList.add('hidden');
+            document.getElementById('levelModal').classList.remove('flex');
+        }
+
+        function openStudySheet() {
+            closeLevelModal();
+            const t = selectedSingleTable;
+            document.getElementById('studyTitle').textContent = `📖 مراجعة جدول ضرب ${t}`;
+            const grid = document.getElementById('studyGrid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= 12; i++) {
+                const item = document.createElement('div');
+                item.dir = 'ltr';
+                item.className = 'bg-sky-50 border-2 border-sky-200 rounded-xl p-2.5 text-center font-black text-lg text-slate-800';
+                item.innerHTML = `<span class="text-sky-600">${t}</span> × <span class="text-indigo-600">${i}</span> = <span class="text-emerald-600">${t * i}</span>`;
+                grid.appendChild(item);
+            }
+
+            document.getElementById('studyModal').classList.remove('hidden');
+            document.getElementById('studyModal').classList.add('flex');
+        }
+
+        function closeStudySheet() {
+            document.getElementById('studyModal').classList.add('hidden');
+            document.getElementById('studyModal').classList.remove('flex');
+        }
+
+        function openCustomModal() {
+            renderCustomCheckboxes();
+            document.getElementById('customModal').classList.remove('hidden');
+            document.getElementById('customModal').classList.add('flex');
+        }
+
+        function closeCustomModal() {
+            document.getElementById('customModal').classList.add('hidden');
+            document.getElementById('customModal').classList.remove('flex');
+        }
+
+        function renderCustomCheckboxes() {
+            const container = document.getElementById('customCheckboxes');
+            container.innerHTML = '';
+            for (let t = 1; t <= 12; t++) {
+                const active = customSelectedTables.includes(t);
+                const btn = document.createElement('button');
+                btn.className = `py-3 rounded-2xl font-black text-lg border-2 transition ${
+                    active
+                        ? 'bg-orange-500 border-orange-600 text-white shadow-md scale-105'
+                        : 'bg-white border-slate-200 text-slate-700 hover:border-orange-300'
+                }`;
+                btn.textContent = t;
+                btn.onclick = () => {
+                    if (customSelectedTables.includes(t)) {
+                        customSelectedTables = customSelectedTables.filter(x => x !== t);
+                    } else {
+                        customSelectedTables.push(t);
+                    }
+                    renderCustomCheckboxes();
+                };
+                container.appendChild(btn);
+            }
+        }
+
+        function setCustomOrder(mode) {
+            customOrderMode = mode;
+            const rBtn = document.getElementById('customRandomBtn');
+            const oBtn = document.getElementById('customOrderedBtn');
+            if (mode === 'random') {
+                rBtn.className = 'flex-1 py-2 rounded-xl font-black text-sm bg-orange-500 text-white shadow';
+                oBtn.className = 'flex-1 py-2 rounded-xl font-black text-sm text-slate-600';
+            } else {
+                oBtn.className = 'flex-1 py-2 rounded-xl font-black text-sm bg-orange-500 text-white shadow';
+                rBtn.className = 'flex-1 py-2 rounded-xl font-black text-sm text-slate-600';
+            }
+        }
+
+        // ==========================================
+        // 5. GAME ENGINE & QUESTION GENERATOR
+        // ==========================================
+        let gameConfig = {
+            type: 'single', // 'single', 'custom', 'all'
+            tables: [1],
+            order: 'ordered',
+            questions: [],
+            currentIndex: 0,
+            correctCount: 0,
+            streak: 0,
+            maxStreak: 0,
+            earnedStars: 0,
+            inputMode: 'choices', // 'choices' or 'keypad'
+            typedAnswer: '',
+            isLocked: false
+        };
+
+        const PRAISE_MESSAGES = [
+            'ممتاز يا بطل! إجابة صاروخية 🚀',
+            'عبقري! استمر بهذا الحماس 🌟',
+            'رائع جداً! مدرسة أم سامح فخورة بك 🏆',
+            'ذكي وسريع! أحسنت 👏',
+            'ضربة معلم! إجابة صحيحة 100% 🎯'
+        ];
+
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function startSingleTable(order) {
+            closeLevelModal();
+            const t = selectedSingleTable;
+            let qs = [];
+            for (let i = 1; i <= 12; i++) {
+                qs.push({ a: t, b: i, ans: t * i });
+            }
+            if (order === 'random') qs = shuffleArray(qs);
+
+            launchGame({
+                type: 'single',
+                tables: [t],
+                order,
+                questions: qs,
+                label: `جدول ${t} (${order === 'ordered' ? 'بالترتيب' : 'عشوائي'})`
+            });
+        }
+
+        function startCustomQuiz() {
+            if (customSelectedTables.length === 0) {
+                alert('اختر جدولاً واحداً على الأقل يا بطل! 🎯');
+                return;
+            }
+            closeCustomModal();
+            const sortedTables = [...customSelectedTables].sort((a, b) => a - b);
+            let pool = [];
+            sortedTables.forEach(t => {
+                for (let i = 1; i <= 12; i++) {
+                    pool.push({ a: t, b: i, ans: t * i });
+                }
+            });
+
+            if (customOrderMode === 'random') {
+                pool = shuffleArray(pool).slice(0, 15); // 15 exciting mixed questions
+            }
+
+            launchGame({
+                type: 'custom',
+                tables: sortedTables,
+                order: customOrderMode,
+                questions: pool,
+                label: `تحدي جداول (${sortedTables.join(' ، ')})`
+            });
+        }
+
+        function startAllRandom() {
+            let pool = [];
+            for (let t = 1; t <= 12; t++) {
+                for (let i = 1; i <= 12; i++) {
+                    pool.push({ a: t, b: i, ans: t * i });
+                }
+            }
+            pool = shuffleArray(pool).slice(0, 20);
+
+            launchGame({
+                type: 'all',
+                tables: [1,2,3,4,5,6,7,8,9,10,11,12],
+                order: 'random',
+                questions: pool,
+                label: 'التحدي الشامل (1 إلى 12 عشوائي) 🔥'
+            });
+        }
+
+        function launchGame({ type, tables, order, questions, label }) {
+            gameConfig = {
+                ...gameConfig,
+                type,
+                tables,
+                order,
+                questions,
+                currentIndex: 0,
+                correctCount: 0,
+                streak: 0,
+                maxStreak: 0,
+                earnedStars: 0,
+                typedAnswer: '',
+                isLocked: false
+            };
+
+            document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('resultView').classList.add('hidden');
+            document.getElementById('gameView').classList.remove('hidden');
+            document.getElementById('gameModeLabel').textContent = label;
+            document.getElementById('qTotal').textContent = questions.length;
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = gameConfig.questions[gameConfig.currentIndex];
+            gameConfig.isLocked = false;
+            gameConfig.typedAnswer = '';
+
+            document.getElementById('qCurrent').textContent = gameConfig.currentIndex + 1;
+            const pct = ((gameConfig.currentIndex) / gameConfig.questions.length) * 100;
+            document.getElementById('gameProgressBar').style.width = `${Math.max(6, pct)}%`;
+
+            document.getElementById('numA').textContent = q.a;
+            document.getElementById('numB').textContent = q.b;
+            const ansBox = document.getElementById('answerDisplay');
+            ansBox.textContent = '؟';
+            ansBox.className = 'min-w-[90px] sm:min-w-[120px] px-3 py-1 rounded-2xl bg-amber-50 border-4 border-dashed border-amber-400 text-orange-600';
+
+            document.getElementById('coachMessage').textContent = 'ركز يا بطل.. كم يساوي حاصل الضرب؟ 🤔';
+            document.getElementById('coachMessage').className = 'inline-block bg-sky-100 text-sky-800 font-extrabold text-sm px-4 py-1.5 rounded-full';
+
+            // Hide visual helper initially
+            document.getElementById('visualHelperBox').classList.add('hidden');
+            buildVisualHelperContent(q.a, q.b);
+
+            // Generate 4 smart choices
+            renderChoices(q);
+        }
+
+        function buildVisualHelperContent(a, b) {
+            const box = document.getElementById('visualHelperBox');
+            // Smart pedagogical hint
+            const repeats = Array(Math.min(b, 6)).fill(a).join(' + ');
+            const extra = b > 6 ? ` + ... (${b} مرات)` : '';
+            box.innerHTML = `
+                <div>💡 الضرب هو جمع متكرر!</div>
+                <div class="mt-1 text-base text-indigo-700" dir="ltr">${a} × ${b} = ${repeats}${extra}</div>
+                <div class="text-xs text-purple-700 mt-1">اجمع العدد ${a} على نفسه ${b} مرات!</div>
+            `;
+        }
+
+        function toggleVisualHelper() {
+            const box = document.getElementById('visualHelperBox');
+            box.classList.toggle('hidden');
+        }
+
+        function renderChoices(q) {
+            const grid = document.getElementById('choicesGrid');
+            grid.innerHTML = '';
+
+            const correct = q.ans;
+            const distractors = new Set();
+
+            // Plausible near-miss distractors so the child actually thinks
+            const candidates = [
+                correct + q.a,
+                Math.max(1, correct - q.a),
+                correct + q.b,
+                Math.max(1, correct - q.b),
+                correct + 1,
+                Math.max(1, correct - 1),
+                correct + 2,
+                (q.a + 1) * q.b
+            ];
+
+            for (const c of shuffleArray(candidates)) {
+                if (c !== correct && distractors.size < 3) {
+                    distractors.add(c);
+                }
+            }
+            while (distractors.size < 3) {
+                const rand = correct + Math.floor(Math.random() * 15) + 1;
+                if (rand !== correct) distractors.add(rand);
+            }
+
+            const options = shuffleArray([correct, ...Array.from(distractors)]);
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-3d bg-white hover:bg-sky-50 border-sky-300 text-slate-800 font-black text-3xl py-4 rounded-2xl shadow-sm transition';
+                btn.textContent = opt;
+                btn.onclick = () => handleAnswer(opt, btn);
+                grid.appendChild(btn);
+            });
+        }
+
+        function toggleInputMode() {
+            const choices = document.getElementById('choicesGrid');
+            const keypad = document.getElementById('keypadContainer');
+            const toggleBtn = document.getElementById('toggleInputBtn');
+
+            if (gameConfig.inputMode === 'choices') {
+                gameConfig.inputMode = 'keypad';
+                choices.classList.add('hidden');
+                keypad.classList.remove('hidden');
+                toggleBtn.textContent = 'العودة إلى الاختيارات المتعددة 🔘';
+            } else {
+                gameConfig.inputMode = 'choices';
+                keypad.classList.add('hidden');
+                choices.classList.remove('hidden');
+                toggleBtn.textContent = 'التبديل إلى لوحة الأرقام (اكتب الإجابة بنفسك) ⌨️';
+            }
+        }
+
+        function pressKey(digit) {
+            if (gameConfig.isLocked) return;
+            if (gameConfig.typedAnswer.length < 3) {
+                gameConfig.typedAnswer += String(digit);
+                document.getElementById('answerDisplay').textContent = gameConfig.typedAnswer;
+            }
+        }
+
+        function clearKey() {
+            if (gameConfig.isLocked) return;
+            gameConfig.typedAnswer = '';
+            document.getElementById('answerDisplay').textContent = '؟';
+        }
+
+        function submitKeypadAnswer() {
+            if (gameConfig.isLocked || gameConfig.typedAnswer === '') return;
+            handleAnswer(parseInt(gameConfig.typedAnswer, 10), null);
+        }
+
+        function handleAnswer(selectedValue, btnElement) {
+            if (gameConfig.isLocked) return;
+            gameConfig.isLocked = true;
+
+            const q = gameConfig.questions[gameConfig.currentIndex];
+            const ansBox = document.getElementById('answerDisplay');
+            const coach = document.getElementById('coachMessage');
+            const card = document.getElementById('questionCard');
+
+            ansBox.textContent = q.ans;
+
+            if (selectedValue === q.ans) {
+                // CORRECT!
+                sfxCorrect();
+                gameConfig.correctCount++;
+                gameConfig.streak++;
+                if (gameConfig.streak > gameConfig.maxStreak) gameConfig.maxStreak = gameConfig.streak;
+
+                // Bonus stars for streak & all-random mode
+                const multiplier = gameConfig.type === 'all' ? 3 : 2;
+                const streakBonus = gameConfig.streak >= 3 ? 1 : 0;
+                gameConfig.earnedStars += (multiplier + streakBonus);
+
+                ansBox.className = 'min-w-[90px] sm:min-w-[120px] px-3 py-1 rounded-2xl bg-emerald-100 border-4 border-emerald-500 text-emerald-700 animate-pop';
+                if (btnElement) {
+                    btnElement.className = 'btn-3d bg-emerald-500 border-emerald-700 text-white font-black text-3xl py-4 rounded-2xl shadow-md';
+                }
+
+                const msg = PRAISE_MESSAGES[Math.floor(Math.random() * PRAISE_MESSAGES.length)];
+                coach.textContent = msg;
+                coach.className = 'inline-block bg-emerald-100 text-emerald-800 font-extrabold text-sm px-4 py-1.5 rounded-full animate-pop';
+
+                document.getElementById('streakCount').textContent = gameConfig.streak;
+                document.getElementById('streakBadge').classList.add('scale-110');
+                setTimeout(() => document.getElementById('streakBadge').classList.remove('scale-110'), 250);
+
+                setTimeout(nextQuestion, 950);
+            } else {
+                // WRONG!
+                sfxWrong();
+                gameConfig.streak = 0;
+                document.getElementById('streakCount').textContent = '0';
+
+                ansBox.className = 'min-w-[90px] sm:min-w-[120px] px-3 py-1 rounded-2xl bg-rose-100 border-4 border-rose-500 text-rose-700';
+                if (btnElement) {
+                    btnElement.className = 'btn-3d bg-rose-500 border-rose-700 text-white font-black text-3xl py-4 rounded-2xl shadow-md';
+                }
+
+                card.classList.add('animate-shake');
+                setTimeout(() => card.classList.remove('animate-shake'), 450);
+
+                coach.innerHTML = `قريبة! الإجابة الصحيحة هي <span dir="ltr" class="underline font-black">${q.a} × ${q.b} = ${q.ans}</span> 💪`;
+                coach.className = 'inline-block bg-rose-100 text-rose-800 font-extrabold text-sm px-4 py-1.5 rounded-full';
+
+                setTimeout(nextQuestion, 1750);
+            }
+        }
+
+        function nextQuestion() {
+            gameConfig.currentIndex++;
+            if (gameConfig.currentIndex < gameConfig.questions.length) {
+                renderQuestion();
+            } else {
+                finishGame();
+            }
+        }
+
+        // ==========================================
+        // 6. END OF ROUND & PROGRESSION UNLOCK
+        // ==========================================
+        function finishGame() {
+            document.getElementById('gameView').classList.add('hidden');
+            document.getElementById('resultView').classList.remove('hidden');
+
+            const total = gameConfig.questions.length;
+            const correct = gameConfig.correctCount;
+            const accuracy = correct / total;
+
+            // Update persistent stars
+            userData.stars += gameConfig.earnedStars;
+
+            let unlockedNew = false;
+            if (gameConfig.type === 'single' && accuracy >= 0.8) {
+                const t = gameConfig.tables[0];
+                if (!userData.masteredTables.includes(t)) {
+                    userData.masteredTables.push(t);
+                }
+                if (t === userData.unlockedLevel && userData.unlockedLevel < 12) {
+                    userData.unlockedLevel++;
+                    unlockedNew = true;
+                }
+            }
+
+            saveUserData();
+
+            // Populate Result UI
+            document.getElementById('resCorrect').textContent = `${correct}/${total}`;
+            document.getElementById('resStars').textContent = `+${gameConfig.earnedStars} ⭐`;
+            document.getElementById('resStreak').textContent = `${gameConfig.maxStreak} 🔥`;
+
+            const unlockBanner = document.getElementById('unlockBanner');
+            const nextBtn = document.getElementById('nextLevelBtn');
+
+            if (accuracy >= 0.8) {
+                sfxWin();
+                confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+                document.getElementById('resultEmoji').textContent = '🏆';
+                document.getElementById('resultTitle').textContent = 'أنت بطل حقيقي يا نجم! 🌟';
+                document.getElementById('resultSubtitle').textContent = 'نتيجة رائعة ترفع الرأس في مدرسة أم سامح';
+            } else {
+                document.getElementById('resultEmoji').textContent = '💪';
+                document.getElementById('resultTitle').textContent = 'محاولة جيدة يا بطل!';
+                document.getElementById('resultSubtitle').textContent = 'تحتاج إلى 80% على الأقل لإتقان المستوى وفتح التالي';
+            }
+
+            if (unlockedNew) {
+                unlockBanner.textContent = `🔓 مبروك! تم فتح جدول ضرب ${userData.unlockedLevel} بنجاح!`;
+                unlockBanner.classList.remove('hidden');
+                nextBtn.classList.remove('hidden');
+            } else if (gameConfig.type === 'single' && accuracy >= 0.8 && gameConfig.tables[0] < 12) {
+                unlockBanner.classList.add('hidden');
+                nextBtn.classList.remove('hidden');
+            } else {
+                unlockBanner.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+            }
+        }
+
+        function playNextLevel() {
+            const nextT = Math.min(12, gameConfig.tables[0] + 1);
+            selectedSingleTable = nextT;
+            startSingleTable('random');
+        }
+
+        function replaySameGame() {
+            if (gameConfig.type === 'single') {
+                startSingleTable(gameConfig.order);
+            } else if (gameConfig.type === 'custom') {
+                startCustomQuiz();
+            } else {
+                startAllRandom();
+            }
+        }
+
+        function exitGame() {
+            goHome();
+        }
+
+        function goHome() {
+            document.getElementById('gameView').classList.add('hidden');
+            document.getElementById('resultView').classList.add('hidden');
+            document.getElementById('homeView').classList.remove('hidden');
+            updateDashboardUI();
+        }
+
+        function resetProgress() {
+            if (confirm('هل أنت متأكد من مسح النجوم والمستويات المفتوحة والبدء من جديد؟')) {
+                localStorage.removeItem(STORAGE_KEY);
+                userData = {
+                    stars: 0,
+                    unlockedLevel: 1,
+                    masteredTables: [],
+                    soundEnabled: true
+                };
+                saveUserData();
+            }
+        }
+
+        // Initialize App on Load
+        loadUserData();
+        updateDashboardUI();
+    </script>
+</body>
+</html>
